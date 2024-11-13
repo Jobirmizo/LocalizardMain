@@ -52,9 +52,7 @@ public class ProjectController : ControllerBase
 
         return Ok(project);
     }
-
-
-
+    
     private ProjectInfo ProjectInfoMapper(ProjectInfoDto projectCreate)
     {
         ProjectInfo projectInfo = new ProjectInfo()
@@ -64,6 +62,8 @@ public class ProjectController : ControllerBase
         };
         return projectInfo;
     }
+    
+    
     [HttpPost]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]

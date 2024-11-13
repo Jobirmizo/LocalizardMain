@@ -249,3 +249,4 @@ D:\Localizard-main\Localizard-main\obj\Debug\net8.0\refint\Localizard.dll
 D:\Localizard-main\Localizard-main\obj\Debug\net8.0\Localizard.pdb
 D:\Localizard-main\Localizard-main\obj\Debug\net8.0\Localizard.genruntimeconfig.cache
 D:\Localizard-main\Localizard-main\obj\Debug\net8.0\ref\Localizard.dll
+D:\Localizard-main\Localizard-main\obj\Debug\net8.0\Localizard.sourcelink.json

@@ -71,12 +71,12 @@ namespace Localizard.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TranslationId1")
+                    b.Property<int?>("TranslationId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TranslationId1");
+                    b.HasIndex("TranslationId");
 
                     b.ToTable("ProjectDetails");
                 });
@@ -128,18 +128,13 @@ namespace Localizard.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("ProjectDetailId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectDetailId");
-
-                    b.ToTable("Translation");
+                    b.ToTable("Translations");
                 });
 
             modelBuilder.Entity("Localizard.Domain.Entites.User", b =>
@@ -374,9 +369,7 @@ namespace Localizard.Migrations
                 {
                     b.HasOne("Localizard.Domain.Entites.Translation", "Translation")
                         .WithMany()
-                        .HasForeignKey("TranslationId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TranslationId");
 
                     b.Navigation("Translation");
                 });
@@ -388,13 +381,6 @@ namespace Localizard.Migrations
                         .HasForeignKey("ProjectDetailId");
 
                     b.Navigation("ProjectDetail");
-                });
-
-            modelBuilder.Entity("Localizard.Domain.Entites.Translation", b =>
-                {
-                    b.HasOne("Localizard.Domain.Entites.ProjectDetail", null)
-                        .WithMany("TranslationId")
-                        .HasForeignKey("ProjectDetailId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -446,11 +432,6 @@ namespace Localizard.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Localizard.Domain.Entites.ProjectDetail", b =>
-                {
-                    b.Navigation("TranslationId");
                 });
 
             modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>
