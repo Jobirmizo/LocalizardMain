@@ -8,5 +8,6 @@ public interface IProjectDetailRepo
     Task<ProjectDetail> GetById(int id);
     bool ProjectDetailExist(int id);
     bool CreateProjectDetail(ProjectDetail projectDetail);
+    bool UpdateProjectDetail(ProjectDetail projectDetail);
     bool Save();
 }

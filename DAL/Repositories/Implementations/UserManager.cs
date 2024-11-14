@@ -33,12 +33,12 @@ public class UserManager : IUserManager
         _context.Add(user);
         return Save();
     }
-    public bool Update(User user)
+
+    public bool UpdateUser(User user)
     {
         _context.Update(user);
         return Save();
     }
-
     public bool Delete(User user)
     {
         _context.Remove(user);

@@ -28,6 +28,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Features\Language\" />
+      <Folder Include="Helper\mapper\" />
       <Folder Include="Migrations\" />
       <Folder Include="Services\Implementations\" />
     </ItemGroup>

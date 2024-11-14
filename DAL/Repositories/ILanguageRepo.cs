@@ -10,7 +10,7 @@ public interface ILanguageRepo
     Task<Language> GetById(int id);
     bool LanguageExists(int id);
     bool CteateLanguage(Language language);
-    bool Update(User user);
+    bool UpdateLanguage(Language language);
     bool Delete(User user);
     bool Save();
 }

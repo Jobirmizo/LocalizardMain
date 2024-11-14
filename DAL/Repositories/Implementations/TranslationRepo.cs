@@ -33,6 +33,12 @@ public class TranslationRepo : ITranslationRepo
         return Save();
     }
 
+    public bool UpdateTranslation(Translation translation)
+    {
+        _context.Update(translation);
+        return Save();
+    }
+
     public bool Save()
     {
         var saved = _context.SaveChanges();

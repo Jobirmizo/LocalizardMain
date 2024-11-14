@@ -36,11 +36,12 @@ public class LanguageRepo : ILanguageRepo
         return Save();
     }
 
-    public bool Update(User user)
+    public bool UpdateLanguage(Language language)
     {
-        throw new NotImplementedException();
+        _context.Update(language);
+        return Save();
     }
-
+    
     public bool Delete(User user)
     {
         throw new NotImplementedException();

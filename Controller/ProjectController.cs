@@ -4,6 +4,7 @@ using Localizard.DAL.Repositories;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,17 +26,20 @@ public class ProjectController : ControllerBase
         _projectDetailRepo = projectDetailRepo;
         _languageRepo = languageRepo;
     }
-    
-    
+
+
     [HttpGet]
-    public  IActionResult GetAllProjects()
+    public  async Task<IActionResult> GetAllProjects()
     {
         var projects = _projectRepo.GetAllProjects();
-        var mappedProjects = _mapper.Map<List<ProjectInfoDto>>(projects);
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-        
-        return Ok(mappedProjects);
+        var projectInfoViews = new List<GetProjectView>(); 
+        foreach (var project in projects)
+        {
+            var projectinfoView = ProjectViewMapper(project);
+            projectinfoView.DefaultLanguage = await _languageRepo.GetById(project.LanguageId);
+            projectInfoViews.Add(projectinfoView);
+        }
+        return Ok(projectInfoViews);
     }
     
    
@@ -53,29 +57,46 @@ public class ProjectController : ControllerBase
         return Ok(project);
     }
     
-    private ProjectInfo ProjectInfoMapper(ProjectInfoDto projectCreate)
+    
+    private ProjectInfo ProjectInfoMapper(CreateProjectView createProjectCreate)
     {
         ProjectInfo projectInfo = new ProjectInfo()
         {
-            Name = projectCreate.Name,
-            LanguageId = projectCreate.DefaultLanguageId,
+            Name = createProjectCreate.Name,
+            LanguageId = createProjectCreate.DefaultLanguageId,
+            CreatedAt = createProjectCreate.CreatedAt,
+            UpdatedAt = createProjectCreate.UpdatedAt
         };
         return projectInfo;
+    }
+
+    private GetProjectView ProjectViewMapper(ProjectInfo projectInfo)
+    {
+        GetProjectView createProjectView = new GetProjectView()
+        {
+            Name = projectInfo.Name,
+            CreatedAt = projectInfo.CreatedAt,
+            UpdatedAt = projectInfo.UpdatedAt,
+            ProjectDetail = projectInfo.ProjectDetail,
+            AvialableLanguages = projectInfo.Languages
+            
+        };
+        return createProjectView;
     }
     
     
     [HttpPost]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
-    public async Task<IActionResult> CreateProject([FromBody] ProjectInfoDto projectCreate)
+    public async Task<IActionResult> CreateProject([FromBody] CreateProjectView createProjectCreate)
     {
-        if (projectCreate == null)
+        if (createProjectCreate == null)
             return BadRequest(ModelState);
 
-        var project = _projectRepo.GetAllProjects().Select(x => x.Name).Contains(projectCreate.Name);
-        var projectInfo =  ProjectInfoMapper(projectCreate);
+        var project = _projectRepo.GetAllProjects().Select(x => x.Name).Contains(createProjectCreate.Name);
+        var projectInfo =  ProjectInfoMapper(createProjectCreate);
 
-        var projectDetail = await _projectDetailRepo.GetById(projectCreate.ProjectDetailId);
+        var projectDetail = await _projectDetailRepo.GetById(createProjectCreate.ProjectDetailId);
         if (projectDetail is not null)
         {
             projectInfo.ProjectDetail = projectDetail;
@@ -100,14 +121,40 @@ public class ProjectController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var projectMap = _mapper.Map<ProjectInfo>(projectCreate);
+        var projectMap = _mapper.Map<ProjectInfo>(createProjectCreate);
 
-        if (!_projectRepo.CreateProject(projectMap))
+        if (!_projectRepo.CreateProject(projectInfo))
         {
             ModelState.AddModelError("", "Something went wrong! while saving");
             return StatusCode(500, ModelState);
         }
 
         return Ok("Successfully created");
+    }
+
+    [HttpPut("{projectId}")]
+    public IActionResult UpdateProject(int projectId, [FromBody] UpdateProjectDto updatedProject)
+    {
+        if (updatedProject == null)
+            return BadRequest(ModelState);
+    
+        if (projectId != updatedProject.Id)
+            return BadRequest(ModelState);
+    
+        if (!_projectRepo.ProjectExists(projectId))
+            return NotFound();
+    
+        if (!ModelState.IsValid)
+            return BadRequest();
+    
+        var projectMap = _mapper.Map<ProjectInfo>(updatedProject);
+    
+        if (!_projectRepo.UpdateProject(projectMap))
+        {
+            ModelState.AddModelError("","Something went wrong while updating");
+            return StatusCode(500, ModelState);
+        }
+    
+        return NoContent();
     }
 }

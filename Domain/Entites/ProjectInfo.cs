@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json.Serialization;
 using Localizard.Domain.Enums;
+using Localizard.Domain.ViewModel;
 
 namespace Localizard.Domain.Entites;
 
@@ -17,5 +18,5 @@ public class ProjectInfo
     public int? ProjectDetailId { get; set; }
     public virtual ProjectDetail ProjectDetail { get; set; }
     [JsonIgnore]
-    public virtual List<Language> Languages { get; set; }
+    public virtual ICollection<Language> Languages { get; set; }
 }

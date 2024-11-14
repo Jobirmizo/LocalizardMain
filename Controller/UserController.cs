@@ -5,6 +5,7 @@ using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
 
@@ -79,5 +80,29 @@ public class UserController : ControllerBase
         }
 
         return Ok("Successfully created");
+    }
+
+    [HttpPut]
+    public IActionResult UpdateUser(int userId, [FromBody] User updateUser)
+    {
+        if (updateUser == null)
+            return BadRequest(ModelState);
+
+        if (userId != updateUser.Id)
+            return BadRequest(ModelState);
+
+        if (!_userManager.UserExists(userId))
+            return NotFound();
+
+        if (!ModelState.IsValid)
+            return BadRequest();
+        if (!_userManager.UpdateUser(updateUser))
+        {
+            ModelState.AddModelError("", "Something went wrong while updating the user");
+            return StatusCode(500, ModelState);
+        }
+
+        return NoContent();
+
     }
 }

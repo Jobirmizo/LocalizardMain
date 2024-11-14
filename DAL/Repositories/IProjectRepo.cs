@@ -9,5 +9,6 @@ public interface IProjectRepo
     Task<ProjectInfo> GetById(int id);
     bool ProjectExists(int id);
     bool CreateProject(ProjectInfo projectInfo);
+    bool UpdateProject(ProjectInfo projectInfo);
     bool Save();
 }

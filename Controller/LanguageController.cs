@@ -23,7 +23,7 @@ public class LanguageController : ControllerBase
     public IActionResult GetAllLanguages()
     {
         var languages = _languageRepo.GetAll();
-        var mappedLanguages = _mapper.Map<List<Language>>(languages);
+        var mappedLanguages = _mapper.Map<List<LanguageDto>>(languages);
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -74,7 +74,32 @@ public class LanguageController : ControllerBase
 
         return Ok("Successfull created;-)");
     }
-    
+
+    [HttpPut]
+    public IActionResult UpdateLanguage(int languageId, [FromBody] UpdateLanguageDto updateLanguage)
+    {
+        if (updateLanguage == null)
+            return BadRequest(ModelState);
+
+        if (languageId != updateLanguage.Id)
+            return BadRequest(ModelState);
+
+        if (!_languageRepo.LanguageExists(languageId))
+            return NotFound();
+
+        if (!ModelState.IsValid)
+            return BadRequest();
+
+        var languageMap = _mapper.Map<Language>(updateLanguage);
+
+        if (!_languageRepo.UpdateLanguage(languageMap))
+        {
+            ModelState.AddModelError("","Something went wrong while creating language");
+            return StatusCode(500, ModelState);
+        }
+
+        return NoContent();
+    }
     
     
 }

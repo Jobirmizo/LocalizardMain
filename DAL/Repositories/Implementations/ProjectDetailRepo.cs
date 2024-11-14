@@ -13,12 +13,12 @@ public class ProjectDetailRepo : IProjectDetailRepo
     }
     public ICollection<ProjectDetail> GetAll()
     {
-        return _context.ProjectDetails.OrderBy(p => p.Id).ToList();
+        return _context.ProjectDetails.Include(x => x.Translation).OrderBy(p => p.Id).ToList();
     }
 
     public async Task<ProjectDetail> GetById(int id)
     {
-        return await _context.ProjectDetails.FirstOrDefaultAsync(p => p.Id == id);
+        return await _context.ProjectDetails.Include(x => x.Translation).FirstOrDefaultAsync(p => p.Id == id);
     }
     
     public bool ProjectDetailExist(int id)
@@ -29,6 +29,12 @@ public class ProjectDetailRepo : IProjectDetailRepo
     public bool CreateProjectDetail(ProjectDetail projectDetail)
     {
         _context.Add(projectDetail);
+        return Save();
+    }
+
+    public bool UpdateProjectDetail(ProjectDetail project)
+    {
+        _context.Update(project);
         return Save();
     }
 

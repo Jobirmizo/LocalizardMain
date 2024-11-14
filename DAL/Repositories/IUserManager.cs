@@ -9,7 +9,7 @@ public interface IUserManager
     Task<User> GetByIdAsync(int id);
     bool UserExists(int id);
     bool CreateUser(User user);
-    bool Update(User user);
+    bool UpdateUser(User user);
     bool Delete(User user);
     bool Save();
 

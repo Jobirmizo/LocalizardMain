@@ -8,5 +8,6 @@ public interface ITranslationRepo
     Task<Translation> GetById(int id);
     bool TranslationExists(int id);
     bool CreateTranslation(Translation translation);
+    bool UpdateTranslation(Translation translation);
     bool Save();
 }

@@ -2,7 +2,7 @@
 
 namespace Localizard.Domain.Entites;
 
-public class Translation
+public class  Translation
 {
     [Key] 
     public int Id { get; set; }

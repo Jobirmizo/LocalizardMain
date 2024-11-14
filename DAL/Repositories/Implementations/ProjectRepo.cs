@@ -15,7 +15,7 @@ public class ProjectRepo : IProjectRepo
 
     public  ICollection<ProjectInfo> GetAllProjects()
     {
-        return _context.Projects.OrderBy(p => p.Id).ToList();
+        return _context.Projects.Include(x=>x.ProjectDetail).Include(x=>x.Languages).OrderBy(p => p.Id).ToList();
     }
 
     public async Task<ProjectInfo> GetById(int id)
@@ -33,7 +33,13 @@ public class ProjectRepo : IProjectRepo
         _context.Add(projectInfo);
         return Save();
     }
-  
+
+    public bool UpdateProject(ProjectInfo project)
+    {
+        _context.Update(project);
+        return Save();
+    }
+
     public bool Save()
     {
         var saved = _context.SaveChanges();

@@ -14,15 +14,13 @@ namespace Localizard.Controller;
 public class ProjectDetailController : ControllerBase
 {
     private readonly IProjectDetailRepo _projectDetail;
-    private readonly IProjectRepo _projectRepo;
     private readonly IMapper _mapper;
     private readonly IProjectDetailRepo _projectDetailRepo;
     private readonly ITranslationRepo _translationRepo;
-    public ProjectDetailController(IMapper mapper, IProjectDetailRepo projectDetail, IProjectRepo projectRepo, IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo)
+    public ProjectDetailController(IMapper mapper, IProjectDetailRepo projectDetail, IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo)
     {
         _mapper = mapper;
         _projectDetail = projectDetail;
-        _projectRepo = projectRepo;
         _projectDetailRepo = projectDetailRepo;
         _translationRepo = translationRepo;
     }
@@ -30,13 +28,15 @@ public class ProjectDetailController : ControllerBase
     [HttpGet]
     public IActionResult GetAllProjectDetails()
     {
-        var projectDetail = _projectDetail.GetAll();
-        var mappedProjectDetails = _mapper.Map<List<ProjectDetailDto>>(projectDetail);
-
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        var projects = _projectDetailRepo.GetAll();
+        var projectDetailViews = new List<GetProjectDetailView>();
+        foreach (var project in projects)
+        {
+            var projectDetailView = GetProjectDetailView(project);
+            projectDetailViews.Add(projectDetailView);
+        }
         
-        return Ok(mappedProjectDetails);
+        return Ok(projectDetailViews);
     }
 
     [HttpGet("{id}")]
@@ -53,34 +53,37 @@ public class ProjectDetailController : ControllerBase
         return Ok(projectDetail);
     }
 
-    private ProjectDetail ProjectDetailMapper(ProjectDetailDto mapperTranslation)
+    private GetProjectDetailView GetProjectDetailView(ProjectDetail view)
     {
-        ProjectDetail translation = new ProjectDetail()
+        GetProjectDetailView detail = new GetProjectDetailView()
         {
-            Key = mapperTranslation.Key,
-            TranslationId = mapperTranslation.TranslationId,
-            Description = mapperTranslation.Description,
-            Tag = mapperTranslation.Tag
+            Key = view.Key,
+            Description = view.Description,
+            Tag = view.Tag,
+            Translation = view.Translation
         };
-        
-        return translation;
+        return detail;
     }
-
+    private ProjectDetail ProjectDetailMapper(ProjectDetailDto createProjectView)
+    {
+        ProjectDetail detail = new ProjectDetail()
+        {
+            Key = createProjectView.Key,
+            TranslationId = createProjectView.TranslationId,
+            Description = createProjectView.Description,
+            Tag = createProjectView.Tag,
+        };
+        return detail;
+    }
+    
     [HttpPost]
     public async Task<IActionResult> CreateProjectDetail([FromBody] ProjectDetailDto projectDetailCreate)
     {
-        if (projectDetailCreate == null)
-            return BadRequest(ModelState);
     
         var project = _projectDetailRepo.GetAll().Select(x => x.Key).Contains(projectDetailCreate.Key);
         var projectDetail = ProjectDetailMapper(projectDetailCreate);
     
         var projectTranslation = await _translationRepo.GetById(projectDetailCreate.TranslationId);
-        if (projectTranslation is not null)
-        {
-            projectDetail.Translation = projectTranslation;
-        }
-
         if (project)
         {
             ModelState.AddModelError("", "Project Key is Already exist");
@@ -99,6 +102,32 @@ public class ProjectDetailController : ControllerBase
         }
 
         return Ok("Successfully created");
+    }
+    
+    [HttpPut("{projectDetailId}")]
+    public IActionResult UpdateProjectDetail(int projectDetailId, [FromBody] UpdateProjectDetailDto updatedProject)
+    {
+        if (updatedProject == null)
+            return BadRequest(ModelState);
+    
+        if (projectDetailId != updatedProject.Id)
+            return BadRequest(ModelState);
+    
+        if (!_projectDetailRepo.ProjectDetailExist(projectDetailId))
+            return NotFound();
+    
+        if (!ModelState.IsValid)
+            return BadRequest();
+    
+        var mappedProject = _mapper.Map<ProjectDetail>(updatedProject);
+    
+        if (!_projectDetailRepo.UpdateProjectDetail(mappedProject))
+        {
+            ModelState.AddModelError("","Something went wrong while updating");
+            return StatusCode(500, ModelState);
+        }
+    
+        return NoContent();
     }
     
 }
