@@ -28,7 +28,7 @@ public class UserController : ControllerBase
     public IActionResult GetAllUsers()
     {
         var users = _userManager.GetAllUsers();
-        var mappedUsers = _mapper.Map<List<GetUsersDto>>(users);
+        var mappedUsers = _mapper.Map<List<GetUsersView>>(users);
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
@@ -53,7 +53,7 @@ public class UserController : ControllerBase
     [HttpPost]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
-    public IActionResult CreateUser([FromBody] UserDto userCreate)
+    public IActionResult CreateUser([FromBody] UserView userCreate)
     {
         if (userCreate == null)
             return BadRequest(ModelState);
@@ -103,6 +103,24 @@ public class UserController : ControllerBase
         }
 
         return NoContent();
+    }
+    
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUser(int userId)
+    {
+        if (!_userManager.UserExists(userId))
+            return NotFound();
 
+        var userDelete = await _userManager.GetByIdAsync(userId);
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (!_userManager.DeleteUser(userDelete))
+        {
+            ModelState.AddModelError("", "Something went wrong while deleting translation");
+        }
+
+        return NoContent();
     }
 }

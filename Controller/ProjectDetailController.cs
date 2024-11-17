@@ -60,11 +60,16 @@ public class ProjectDetailController : ControllerBase
             Key = view.Key,
             Description = view.Description,
             Tag = view.Tag,
-            Translation = view.Translation
+            Translation = new GetTranslationView
+            {
+                Key = view.Translation.Key,
+                Language = view.Translation.Language,
+                Text = view.Translation.Text
+            }
         };
         return detail;
     }
-    private ProjectDetail ProjectDetailMapper(ProjectDetailDto createProjectView)
+    private ProjectDetail ProjectDetailMapper(ProjectDetailView createProjectView)
     {
         ProjectDetail detail = new ProjectDetail()
         {
@@ -77,13 +82,17 @@ public class ProjectDetailController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateProjectDetail([FromBody] ProjectDetailDto projectDetailCreate)
+    public async Task<IActionResult> CreateProjectDetail([FromBody] ProjectDetailView projectDetailCreate)
     {
     
         var project = _projectDetailRepo.GetAll().Select(x => x.Key).Contains(projectDetailCreate.Key);
         var projectDetail = ProjectDetailMapper(projectDetailCreate);
     
         var projectTranslation = await _translationRepo.GetById(projectDetailCreate.TranslationId);
+        if (projectDetail != null)
+        {
+            projectDetail.Translation = projectTranslation;
+        }
         if (project)
         {
             ModelState.AddModelError("", "Project Key is Already exist");
@@ -104,8 +113,8 @@ public class ProjectDetailController : ControllerBase
         return Ok("Successfully created");
     }
     
-    [HttpPut("{projectDetailId}")]
-    public IActionResult UpdateProjectDetail(int projectDetailId, [FromBody] UpdateProjectDetailDto updatedProject)
+    [HttpPut]
+    public IActionResult UpdateProjectDetail(int projectDetailId, [FromBody] UpdateProjectDetailView updatedProject)
     {
         if (updatedProject == null)
             return BadRequest(ModelState);
@@ -130,4 +139,23 @@ public class ProjectDetailController : ControllerBase
         return NoContent();
     }
     
+    [HttpDelete]
+    public async Task<IActionResult> DeleteProjectDetail(int detailId)
+    {
+        if (!_projectDetailRepo.ProjectDetailExist(detailId))
+            return NotFound();
+
+        var deleteDetail = await _projectDetailRepo.GetById(detailId);
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (!_projectDetailRepo.DeleteProjectDetail(deleteDetail))
+        {
+            ModelState.AddModelError("", "Something went wrong while deleting translation");
+        }
+
+        return NoContent();
+    }
+
 }

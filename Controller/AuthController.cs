@@ -41,7 +41,7 @@ public class AuthController : ControllerBase
     
     [AllowAnonymous]
     [HttpPost]
-    public async Task<ActionResult<LoginResponseDto>> Login(LoginDto request)
+    public async Task<ActionResult<LoginResponseView>> Login(LoginView request)
     {
         if (request == null)
         {
@@ -55,14 +55,14 @@ public class AuthController : ControllerBase
         }
         
         var token = _tokenService.GenerateJwtToken(user);
-        var response = new AuthResponseDto.AuthResponse(token, user.Username, user.Role);
+        var response = new AuthResponseView.AuthResponse(token, user.Username, user.Role);
         
         return Ok(token);
     }
     
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> Register([FromBody] RegisterDto model)
+    public async Task<IActionResult> Register([FromBody] RegisterView model)
     {
         if (model == null || !ModelState.IsValid)
         {

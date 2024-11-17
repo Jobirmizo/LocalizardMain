@@ -32,6 +32,7 @@ public class ProjectController : ControllerBase
     public  async Task<IActionResult> GetAllProjects()
     {
         var projects = _projectRepo.GetAllProjects();
+        
         var projectInfoViews = new List<GetProjectView>(); 
         foreach (var project in projects)
         {
@@ -85,6 +86,7 @@ public class ProjectController : ControllerBase
     }
     
     
+    
     [HttpPost]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -133,7 +135,7 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPut("{projectId}")]
-    public IActionResult UpdateProject(int projectId, [FromBody] UpdateProjectDto updatedProject)
+    public IActionResult UpdateProject(int projectId, [FromBody] UpdateProjectView updatedProject)
     {
         if (updatedProject == null)
             return BadRequest(ModelState);

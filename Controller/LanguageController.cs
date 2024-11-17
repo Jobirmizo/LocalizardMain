@@ -23,7 +23,7 @@ public class LanguageController : ControllerBase
     public IActionResult GetAllLanguages()
     {
         var languages = _languageRepo.GetAll();
-        var mappedLanguages = _mapper.Map<List<LanguageDto>>(languages);
+        var mappedLanguages = _mapper.Map<List<LanguageView>>(languages);
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -46,7 +46,7 @@ public class LanguageController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateLanguage([FromBody] LanguageDto languageCreate)
+    public IActionResult CreateLanguage([FromBody] LanguageView languageCreate)
     {
         if (languageCreate == null)
             return BadRequest(ModelState);
@@ -76,7 +76,7 @@ public class LanguageController : ControllerBase
     }
 
     [HttpPut]
-    public IActionResult UpdateLanguage(int languageId, [FromBody] UpdateLanguageDto updateLanguage)
+    public IActionResult UpdateLanguage(int languageId, [FromBody] UpdateLanguageView updateLanguage)
     {
         if (updateLanguage == null)
             return BadRequest(ModelState);
