@@ -63,7 +63,7 @@ public class ProjectDetailController : ControllerBase
             Translation = new GetTranslationView
             {
                 Key = view.Translation.Key,
-                Language = view.Translation.Language,
+                Language = view.Translation.Languages,
                 Text = view.Translation.Text
             }
         };

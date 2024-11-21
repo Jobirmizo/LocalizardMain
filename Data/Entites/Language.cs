@@ -10,5 +10,7 @@ public class Language
     public int Id { get; set; }
     public string Name { get; set; }
     public string LanguageCode { get; set; }
-    [JsonIgnore] public ICollection<ProjectInfo> ProjectInfos { get; set; } = new List<ProjectInfo>();
+    [JsonIgnore] 
+    public ICollection<ProjectInfo> ProjectInfos { get; set; } = new List<ProjectInfo>();
+    public Translation Translation { get; set; }
 }

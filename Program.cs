@@ -38,7 +38,6 @@ builder.Services.AddScoped<ITranslationRepo, TranslationRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<TokenService>();
-builder.Services.AddControllers();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -59,7 +58,10 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
     };
 });
+
 builder.Services.AddAuthorization();
+builder.Services.AddMvc();
+builder.Services.AddControllers();
 builder.Services.AddIdentityApiEndpoints<IdentityUser>()
     .AddEntityFrameworkStores<AppDbContext>();
 
@@ -82,7 +84,9 @@ app.MapIdentityApi<IdentityUser>();
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

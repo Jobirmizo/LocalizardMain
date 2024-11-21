@@ -250,3 +250,7 @@ D:\Localizard-main\Localizard-main\obj\Debug\net8.0\Localizard.pdb
 D:\Localizard-main\Localizard-main\obj\Debug\net8.0\Localizard.genruntimeconfig.cache
 D:\Localizard-main\Localizard-main\obj\Debug\net8.0\ref\Localizard.dll
 D:\Localizard-main\Localizard-main\obj\Debug\net8.0\Localizard.sourcelink.json
+D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Microsoft.AspNetCore.Authorization.dll
+D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Microsoft.AspNetCore.Metadata.dll
+D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll

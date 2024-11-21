@@ -2,12 +2,14 @@
 using Localizard.DAL.Repositories;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Localizard.Controller;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
+[Authorize]
 public class LanguageController : ControllerBase
 {
     private readonly ILanguageRepo _languageRepo;

@@ -35,11 +35,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -55,6 +50,10 @@
               "version": "[4.0.3, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.AspNetCore.Authorization": {
               "target": "Package",
               "version": "[8.0.8, )"
             },
@@ -97,6 +96,10 @@
             "Swashbuckle.AspNetCore.Filters": {
               "target": "Package",
               "version": "[8.0.2, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.2.0, )"
             }
           },
           "imports": [

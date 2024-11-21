@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Net.Sockets;
+using System.Security.Cryptography;
+using AutoMapper;
 using Localizard.DAL;
 using Localizard.DAL.Repositories;
 using Localizard.DAL.Repositories.Implementations;
@@ -16,12 +18,25 @@ public class TranslationController : ControllerBase
 {
 
     private readonly ITranslationRepo _translationRepo;
+    private readonly ILanguageRepo _languageRepo;
     private readonly IMapper _mapper;
     
-    public TranslationController(IMapper mapper, ITranslationRepo translationRepo)
+    public TranslationController(IMapper mapper, ITranslationRepo translationRepo, ILanguageRepo languageRepo)
     {
         _mapper = mapper;
         _translationRepo = translationRepo;
+        _languageRepo = languageRepo;
+    }
+
+    private Translation TranslationMapper(CreateTranslationView createTranslation)
+    {
+        Translation create = new Translation()
+        {
+            Key = createTranslation.Key,
+            LanguageId = createTranslation.LanguageId,
+            Text = createTranslation.Text
+        };
+        return create;
     }
 
     [HttpGet]
@@ -53,18 +68,20 @@ public class TranslationController : ControllerBase
     [HttpPost]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
-    public IActionResult CreateTranslation([FromBody] CreateTranslationView create)
+    public  IActionResult CreateTranslation([FromBody] CreateTranslationView create)
     {
-        if (create == null)
-            return BadRequest(ModelState);
+        var translate = _translationRepo.GetAll().Select(x => x.Key).Contains(create.Key);
+        var translation = TranslationMapper(create);
 
-        var translation = _translationRepo.GetAll()
-            .Where(p => p.Key.Trim().ToUpper() == create.Key.TrimEnd().ToUpper())
-            .FirstOrDefault();
-
+        var translationLanguageId = _languageRepo.GetById(create.LanguageId);
         if (translation != null)
         {
-            ModelState.AddModelError("", "Project already exist!");
+            translation.LanguageId = translationLanguageId.Id;
+        }
+        
+        if (translate)
+        {
+            ModelState.AddModelError("","Translation key is already used");
             return StatusCode(422, ModelState);
         }
 
@@ -73,13 +90,13 @@ public class TranslationController : ControllerBase
 
         var mappedTranslation = _mapper.Map<Translation>(create);
 
-        if (!_translationRepo.CreateTranslation(mappedTranslation))
+        if (_translationRepo.CreateTranslation(mappedTranslation))
         {
-            ModelState.AddModelError("", "Something went wrong! while saving");
+            ModelState.AddModelError("", "Something went wrong while saving");
             return StatusCode(500, ModelState);
         }
 
-        return Ok("Successfully created");
+        return Ok("Success");
     }
     
     [HttpPut]

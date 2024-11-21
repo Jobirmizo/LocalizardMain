@@ -125,7 +125,7 @@ public class ProjectController : ControllerBase
 
         var projectMap = _mapper.Map<ProjectInfo>(createProjectCreate);
 
-        if (!_projectRepo.CreateProject(projectInfo))
+        if (!_projectRepo.CreateProject(projectMap))
         {
             ModelState.AddModelError("", "Something went wrong! while saving");
             return StatusCode(500, ModelState);
