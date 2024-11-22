@@ -14,8 +14,7 @@ using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
+#region Oapi and controller
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -30,6 +29,11 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+#endregion
+#region Added Services
+
 builder.Services.AddScoped<IUserManager, UserManager>();
 builder.Services.AddScoped<IProjectRepo, ProjectRepo>();
 builder.Services.AddScoped<IProjectDetailRepo, ProjectDetailRepo>();
@@ -38,6 +42,10 @@ builder.Services.AddScoped<ITranslationRepo, TranslationRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<TokenService>();
+
+#endregion
+#region Authentication
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -65,10 +73,17 @@ builder.Services.AddControllers();
 builder.Services.AddIdentityApiEndpoints<IdentityUser>()
     .AddEntityFrameworkStores<AppDbContext>();
 
+
+#endregion
+#region DB
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+
+#endregion
 
 
 var app = builder.Build();

@@ -4,13 +4,10 @@ using Localizard.Domain.Entites;
 
 namespace Localizard.Domain.ViewModel;
 
-public class ProjectDetailView
+public class CreateProjectDetailView
 {
     public string Key { get; set; }
-    public int TranslationId { get; set; }
+    public int[] TranslationIds { get; set; } = null!;
     public string Description { get; set; }
     public string Tag { get; set; }
-    
-    [JsonIgnore]
-    public Translation Translation { get; set; }
 }

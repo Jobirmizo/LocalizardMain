@@ -12,5 +12,6 @@ public class Language
     public string LanguageCode { get; set; }
     [JsonIgnore] 
     public ICollection<ProjectInfo> ProjectInfos { get; set; } = new List<ProjectInfo>();
-    public Translation Translation { get; set; }
+    [JsonIgnore]
+    public virtual ICollection<Translation> Translations { get; set; }
 }
