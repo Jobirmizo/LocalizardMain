@@ -31,9 +31,13 @@ public class MappingProfiles : Profile
         CreateMap<ProjectInfo, CreateProjectView>();
         CreateMap<CreateProjectView, ProjectInfo>();
 
-        CreateMap<ProjectDetail, ProjectDetailView>();
-        CreateMap<ProjectDetailView, ProjectDetail>();
+        CreateMap<ProjectDetail, CreateProjectDetailView>();
+        CreateMap<CreateProjectDetailView, ProjectDetail>();
 
+        CreateMap<ProjectDetail, GetProjectDetailView>().ReverseMap();
+        
+        CreateMap<Translation, GetTranslationView>().ReverseMap(); 
+        
         CreateMap<ProjectInfo, UpdateProjectView>();
         CreateMap<UpdateProjectView, ProjectInfo>();
 
@@ -43,8 +47,7 @@ public class MappingProfiles : Profile
         CreateMap<UpdateProjectView, Language>();
         CreateMap<Language, UpdateLanguageView>();
 
-        CreateMap<Translation, GetTranslationView>();
-        CreateMap<GetTranslationView, Translation>();
+             
         
         CreateMap<Translation, CreateTranslationView>();
         CreateMap<CreateTranslationView, Translation>();

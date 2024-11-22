@@ -1,6 +1,10 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "GcqqTRb47Uc=",
+=======
+  "dgSpecHash": "90vo2hU5lvA=",
+>>>>>>> fb4bc4424b7dd475f30033fee8a2432e0def17dd
   "success": true,
   "projectFilePath": "C:\\Users\\tursu\\Desktop\\LocalizardMain\\Localizard.csproj",
   "expectedPackageFiles": [

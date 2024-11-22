@@ -5,6 +5,7 @@ using Localizard.DAL.Repositories.Implementations;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
@@ -25,17 +26,41 @@ public class ProjectDetailController : ControllerBase
         _translationRepo = translationRepo;
     }
 
+    private GetProjectDetailView GetDetailMapper(ProjectDetail detail)
+    {
+        GetProjectDetailView detailView = new GetProjectDetailView()
+        {
+            Key = detail.Key,
+            Description = detail.Description,
+            Tag = detail.Tag,
+            AvailableTranslations = detail.Translation
+        };
+        return detailView;
+    }
+
+    private ProjectDetail CraeteDetailMapper(CreateProjectDetailView create)
+    {
+        ProjectDetail detailView = new ProjectDetail()
+        {
+            Key = create.Key,
+            Description = create.Description,
+            Tag = create.Tag
+        };
+        return detailView;
+    }
+
     [HttpGet]
     public IActionResult GetAllProjectDetails()
     {
-        var projects = _projectDetailRepo.GetAll();
+        var projectDetails = _projectDetailRepo.GetAll();
+
         var projectDetailViews = new List<GetProjectDetailView>();
-        foreach (var project in projects)
+        foreach (var detial in projectDetails)
         {
-            var projectDetailView = GetProjectDetailView(project);
-            projectDetailViews.Add(projectDetailView);
+            var detailView = GetDetailMapper(detial);
+            projectDetailViews.Add(detailView);
         }
-        
+
         return Ok(projectDetailViews);
     }
 
@@ -48,69 +73,45 @@ public class ProjectDetailController : ControllerBase
         var projectDetail = await _projectDetail.GetById(id);
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest(ModelState);  
 
         return Ok(projectDetail);
     }
-
-    private GetProjectDetailView GetProjectDetailView(ProjectDetail view)
-    {
-        GetProjectDetailView detail = new GetProjectDetailView()
-        {
-            Key = view.Key,
-            Description = view.Description,
-            Tag = view.Tag,
-            Translation = new GetTranslationView
-            {
-                Key = view.Translation.Key,
-                Language = view.Translation.Languages,
-                Text = view.Translation.Text
-            }
-        };
-        return detail;
-    }
-    private ProjectDetail ProjectDetailMapper(ProjectDetailView createProjectView)
-    {
-        ProjectDetail detail = new ProjectDetail()
-        {
-            Key = createProjectView.Key,
-            TranslationId = createProjectView.TranslationId,
-            Description = createProjectView.Description,
-            Tag = createProjectView.Tag,
-        };
-        return detail;
-    }
     
     [HttpPost]
-    public async Task<IActionResult> CreateProjectDetail([FromBody] ProjectDetailView projectDetailCreate)
+    public async Task<IActionResult> CreateProjectDetail([FromBody] CreateProjectDetailView detail)
     {
-    
-        var project = _projectDetailRepo.GetAll().Select(x => x.Key).Contains(projectDetailCreate.Key);
-        var projectDetail = ProjectDetailMapper(projectDetailCreate);
-    
-        var projectTranslation = await _translationRepo.GetById(projectDetailCreate.TranslationId);
-        if (projectDetail != null)
+        if (detail == null)
+            return BadRequest(ModelState);
+
+        var checkDetail = _projectDetailRepo.GetAll().Select(d => d.Key).Contains(detail.Key);
+        var projectDetail = CraeteDetailMapper(detail);
+        
+        var translations = _translationRepo.GetAll();
+        foreach (var translate in translations)
         {
-            projectDetail.Translation = projectTranslation;
+            if (projectDetail.Translation is null)
+                projectDetail.Translation = new List<Translation>();
+            
+            projectDetail.Translation.Add(translate);
         }
-        if (project)
+
+        if (checkDetail)
         {
-            ModelState.AddModelError("", "Project Key is Already exist");
-            return StatusCode(422, ModelState);
+            ModelState.AddModelError("","Project Detail already exists!");
+            return StatusCode(500, ModelState);
         }
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var mappedProjectDetail = _mapper.Map<ProjectDetail>(projectDetailCreate);
-
-        if (!_projectDetailRepo.CreateProjectDetail(mappedProjectDetail))
+        if (!_projectDetailRepo.CreateProjectDetail(projectDetail))
         {
-            ModelState.AddModelError("", "Something went wrong");
+            ModelState.AddModelError("","Something went wrong while saving");
             return StatusCode(500, ModelState);
         }
 
-        return Ok("Successfully created");
+        return Ok("Successfully created;-)");
     }
     
     [HttpPut]

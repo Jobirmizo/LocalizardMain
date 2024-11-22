@@ -11,7 +11,7 @@ public class LanguageRepo : ILanguageRepo
     
     private readonly AppDbContext _context;
 
-    public LanguageRepo(IMapper mapper, AppDbContext context)
+    public LanguageRepo(AppDbContext context)
     {
         _context = context;
     }

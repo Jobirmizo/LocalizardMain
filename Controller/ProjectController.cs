@@ -13,6 +13,7 @@ namespace Localizard.Controller;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
+[Authorize]
 public class ProjectController : ControllerBase
 {
     private readonly IProjectRepo _projectRepo;
@@ -32,7 +33,17 @@ public class ProjectController : ControllerBase
     [HttpGet]
     public  async Task<IActionResult> GetAllProjects()
     {
-        var projects = _projectRepo.GetAllProjects();
+        var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+        
+        var projects = _projectRepo.GetAllProjects()
+            .Where(p => p.CreatedBy == userId)
+            .ToList();
+        
+        if (!projects.Any())
+            return NotFound("No projects found for the current user.");
+        
         
         var projectInfoViews = new List<GetProjectView>(); 
         foreach (var project in projects)
@@ -88,7 +99,6 @@ public class ProjectController : ControllerBase
             UpdatedAt = projectInfo.UpdatedAt,
             ProjectDetail = projectInfo.ProjectDetail,
             AvialableLanguages = projectInfo.Languages
-            
         };
         return createProjectView;
     }
@@ -98,15 +108,22 @@ public class ProjectController : ControllerBase
     [HttpPost]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
-    public async Task<IActionResult> CreateProject([FromBody] CreateProjectView createProjectCreate)
+    public async Task<IActionResult> CreateProject([FromBody] CreateProjectView create)
     {
-        if (createProjectCreate == null)
+        if (create == null)
             return BadRequest(ModelState);
 
-        var project = _projectRepo.GetAllProjects().Select(x => x.Name).Contains(createProjectCreate.Name);
-        var projectInfo =  ProjectInfoMapper(createProjectCreate);
+        var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
-        var projectDetail = await _projectDetailRepo.GetById(createProjectCreate.ProjectDetailId);
+        var project = _projectRepo.GetAllProjects().Select(x => x.Name).Contains(create.Name);
+        
+        var projectInfo =  ProjectInfoMapper(create);
+        projectInfo.CreatedBy = userId;
+        
+        var projectDetail = await _projectDetailRepo.GetById(create.ProjectDetailId);
         if (projectDetail is not null)
         {
             projectInfo.ProjectDetail = projectDetail;
@@ -131,9 +148,7 @@ public class ProjectController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var projectMap = _mapper.Map<ProjectInfo>(createProjectCreate);
-
-        if (!_projectRepo.CreateProject(projectMap))
+        if (!_projectRepo.CreateProject(projectInfo))
         {
             ModelState.AddModelError("", "Something went wrong! while saving");
             return StatusCode(500, ModelState);

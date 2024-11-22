@@ -14,7 +14,7 @@ public class TranslationRepo : ITranslationRepo
     
     public ICollection<Translation> GetAll()
     {
-        return _context.Translations.OrderBy(p => p.Id).Include(l => l.Languages).ToList();
+        return _context.Translations.OrderBy(p => p.Id).Include(l => l.Language).ToList();
     }
 
     public async Task<Translation> GetById(int id)
@@ -33,9 +33,9 @@ public class TranslationRepo : ITranslationRepo
         return Save();
     }
 
-    public bool UpdateTranslation(Translation translation)
+    public bool UpdateTranslation(Translation translate)
     {
-        _context.Update(translation);
+        _context.Update(translate);
         return Save();
     }
 

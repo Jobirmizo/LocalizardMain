@@ -18,36 +18,28 @@ public class TranslationController : ControllerBase
 {
 
     private readonly ITranslationRepo _translationRepo;
-    private readonly ILanguageRepo _languageRepo;
     private readonly IMapper _mapper;
     
-    public TranslationController(IMapper mapper, ITranslationRepo translationRepo, ILanguageRepo languageRepo)
+    public TranslationController(IMapper mapper, ITranslationRepo translationRepo)
     {
         _mapper = mapper;
         _translationRepo = translationRepo;
-        _languageRepo = languageRepo;
     }
-
-    private Translation TranslationMapper(CreateTranslationView createTranslation)
-    {
-        Translation create = new Translation()
-        {
-            Key = createTranslation.Key,
-            LanguageId = createTranslation.LanguageId,
-            Text = createTranslation.Text
-        };
-        return create;
-    }
-
+    
+    
     [HttpGet]
-    public IActionResult GetAllTranslations()
+    public async Task<IActionResult> GetAllTranslations()
     {
         var translations = _translationRepo.GetAll();
-        var mappedTranslations = _mapper.Map<List<GetTranslationView>>(translations);
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
 
-        return Ok(mappedTranslations);
+        var translationView = new List<GetTranslationView>();
+        foreach (var tranlate in translations)
+        {
+            var translateView = GetTranslationMapper(tranlate);
+            translationView.Add(translateView);
+        }
+
+        return Ok(translationView);
     }
     
     [AllowAnonymous]
@@ -68,35 +60,34 @@ public class TranslationController : ControllerBase
     [HttpPost]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
-    public  IActionResult CreateTranslation([FromBody] CreateTranslationView create)
+    public IActionResult CreateTranslation([FromBody] CreateTranslationView create)
     {
-        var translate = _translationRepo.GetAll().Select(x => x.Key).Contains(create.Key);
-        var translation = TranslationMapper(create);
 
-        var translationLanguageId = _languageRepo.GetById(create.LanguageId);
+        if (create == null)
+            return BadRequest(ModelState);
+
+        var translation = _translationRepo.GetAll()
+            .Where(l => l.Key.Trim().ToUpper() == create.Key.TrimEnd().ToUpper())
+            .FirstOrDefault();
+
         if (translation != null)
         {
-            translation.LanguageId = translationLanguageId.Id;
-        }
-        
-        if (translate)
-        {
-            ModelState.AddModelError("","Translation key is already used");
+            ModelState.AddModelError("", "Language already exists");
             return StatusCode(422, ModelState);
         }
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var mappedTranslation = _mapper.Map<Translation>(create);
+        var mappedtranslation = _mapper.Map<Translation>(create);
 
-        if (_translationRepo.CreateTranslation(mappedTranslation))
+        if (!_translationRepo.CreateTranslation(mappedtranslation))
         {
-            ModelState.AddModelError("", "Something went wrong while saving");
+            ModelState.AddModelError("", "Something went wrong");
             return StatusCode(500, ModelState);
         }
 
-        return Ok("Success");
+        return Ok("Successfull created;-)");
     }
     
     [HttpPut]
@@ -141,5 +132,21 @@ public class TranslationController : ControllerBase
 
         return NoContent();
     }
-    
+
+
+    private GetTranslationView GetTranslationMapper(Translation translation)
+    {
+        GetTranslationView getTranslates = new GetTranslationView()
+        {
+            Key = translation.Key,
+            Text = translation.Text,
+            Language = new LanguageView()
+            {
+                Name = translation.Language.Name,
+                LanguageCode = translation.Language.LanguageCode
+            }
+        };
+
+        return getTranslates;
+    }
 }

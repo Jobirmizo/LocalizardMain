@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Localizard.Domain.ViewModel;
 
 namespace Localizard.Domain.Entites;
@@ -10,6 +11,8 @@ public class  Translation
     public string Key { get; set; }
     public int LanguageId { get; set; }
     public string Text { get; set; }
-    public Language Languages { get; set; } = null!;
+    public virtual Language Language { get; set; }
+    [JsonIgnore]
+    public virtual ICollection<ProjectDetail> ProjectDetails { get; set; } = new List<ProjectDetail>();
 
 }

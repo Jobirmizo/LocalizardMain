@@ -13,10 +13,11 @@ public class ProjectInfo
     public int Id { get; set; }
     public string Name { get; set; }
     public int LanguageId { get; set; }
+    
+    public string CreatedBy { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public int? ProjectDetailId { get; set; }
     public virtual ProjectDetail ProjectDetail { get; set; }
-    [JsonIgnore]
     public virtual ICollection<Language> Languages { get; set; }
 }
