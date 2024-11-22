@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using System.Linq;
 using Localizard.DAL.Repositories;
+using Localizard.DAL.Repositories.Implementations;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
 using Microsoft.AspNetCore.Authorization;
@@ -57,8 +58,15 @@ public class ProjectController : ControllerBase
 
         return Ok(project);
     }
-    
-    
+
+    [HttpGet]
+    public IEnumerable<ProjectInfo> Pagination(int page = 1, int pageSize = 10)
+    {
+        var totalCount = _projectRepo.GetAllProjects().Count();
+        var totalPages = (int)Math.Ceiling((decimal)totalCount / 10);
+        var projectsPage = _projectRepo.GetAllProjects().Skip((totalPages - 1) * 10).Take(10).ToList();
+        return projectsPage;
+    }
     private ProjectInfo ProjectInfoMapper(CreateProjectView createProjectCreate)
     {
         ProjectInfo projectInfo = new ProjectInfo()

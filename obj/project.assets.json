@@ -3524,19 +3524,20 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\hishi\\.nuget\\packages\\": {}
+    "C:\\Users\\tursu\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Localizard-main\\Localizard-main\\Localizard.csproj",
+      "projectUniqueName": "C:\\Users\\tursu\\Desktop\\LocalizardMain\\Localizard.csproj",
       "projectName": "Localizard",
-      "projectPath": "D:\\Localizard-main\\Localizard-main\\Localizard.csproj",
-      "packagesPath": "C:\\Users\\hishi\\.nuget\\packages\\",
-      "outputPath": "D:\\Localizard-main\\Localizard-main\\obj\\",
+      "projectPath": "C:\\Users\\tursu\\Desktop\\LocalizardMain\\Localizard.csproj",
+      "packagesPath": "C:\\Users\\tursu\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\tursu\\Desktop\\LocalizardMain\\obj\\",
       "projectStyle": "PackageReference",
+      "UsingMicrosoftNETSdk": false,
       "configFilePaths": [
-        "C:\\Users\\hishi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\tursu\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -3557,6 +3558,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {

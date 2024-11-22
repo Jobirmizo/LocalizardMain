@@ -98,6 +98,26 @@ public class AuthController : ControllerBase
 
         });
     }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult>UsersPagination(int page = 1, int pageSize = 10)
+    {
+        var totalRecords = await _context.Users.CountAsync();
+        var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+        
+        var users = await _context.Users.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+        var response = new
+        {
+            page,
+            pageSize,
+            totalRecords,
+            totalPages,
+            data = users
+        };
+        return Ok(response);
+    }
     
     
    
