@@ -156,15 +156,64 @@ public class ProjectController : ControllerBase
         return Ok("Successfully created");
     }
 
-    [HttpPut("{id}")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateProject(int id, [FromBody] UpdateProjectView update)
-    {
-     
-    }
+    // [HttpPut("{id}")]
+    // [ProducesResponseType(204)]
+    // [ProducesResponseType(400)]
+    // [ProducesResponseType(403)]
+    // [ProducesResponseType(404)]
+    // public async Task<IActionResult> UpdateProject(int id, [FromBody] UpdateProjectView update)
+    // {
+    //     if (update == null)
+    //         return BadRequest(ModelState);
+    //     
+    //     var existingProject = await _projectRepo.GetById(id);
+    //     
+    //     if (existingProject == null)
+    //         return NotFound($"Project with ID {id} not found.");
+    //     
+    //     var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    //
+    //     if (string.IsNullOrEmpty(userId))
+    //         return Unauthorized();
+    //
+    //     var projectExists = _projectRepo.GetAllProjects().Any(x => x.Name == update.Name && x.Id != id);
+    //     
+    //     if (projectExists)
+    //     {
+    //         ModelState.AddModelError("", "A project with this name already exists.");
+    //         return StatusCode(422, ModelState);
+    //     }
+    //     
+    //     var projectDetails = _projectDetailRepo.GetAll();
+    //     existingProject.ProjectDetail.Clear();
+    //     
+    //     foreach (var detail in projectDetails)
+    //     {
+    //         if (update.ProjectDetailIds.Contains(detail.Id))
+    //             existingProject.ProjectDetail.Add(detail);
+    //     }
+    //     
+    //     var languages = _languageRepo.GetAll();
+    //     existingProject.Languages.Clear(); // Clear existing Languages list to avoid duplicates
+    //
+    //     foreach (var language in languages)
+    //     {
+    //         if (update.AvailableLanguageIds.Contains(language.Id))
+    //             existingProject.Languages.Add(language);
+    //     }
+    //     
+    //     if (!ModelState.IsValid)
+    //         return BadRequest(ModelState);
+    //
+    //     // Save the updated project
+    //     if (!_projectRepo.UpdateProject(existingProject))
+    //     {
+    //         ModelState.AddModelError("", "Something went wrong while saving the project.");
+    //         return StatusCode(500, ModelState);
+    //     }
+    //
+    //     return Ok("Successfully updated the project.");
+    // }
 
 
     #region CreateProjectMapper
@@ -195,5 +244,10 @@ public class ProjectController : ControllerBase
     }
     #endregion
 
-   
+    // private ProjectInfo UpdateProjectMapper(UpdateProjectView update)
+    // {
+    //     return update;
+    // }
+
+
 }
