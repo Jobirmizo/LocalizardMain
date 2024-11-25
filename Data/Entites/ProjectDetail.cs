@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Localizard.Domain.Enums;
 
 namespace Localizard.Domain.Entites;
@@ -14,6 +15,8 @@ public class ProjectDetail
     public string Description { get; set; }
     public string Tag { get; set; }
     public virtual ICollection<Translation> Translation { get; set; }
+    [JsonIgnore]
+    public ICollection<ProjectInfo> ProjectInfos { get; set; } = new List<ProjectInfo>();
     public PlatformEnum PlatformCategories { get; set; }
     
 }

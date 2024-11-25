@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using System.Linq;
+using System.Security.Claims;
+using Localizard.DAL;
 using Localizard.DAL.Repositories;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
@@ -19,13 +21,15 @@ public class ProjectController : ControllerBase
     private readonly IProjectDetailRepo _projectDetailRepo;
     private readonly ILanguageRepo _languageRepo;
     private readonly IMapper _mapper;
+    private readonly AppDbContext _context;
     
-    public ProjectController(IProjectRepo projectRepo, IMapper mapper, IProjectDetailRepo projectDetailRepo, ILanguageRepo languageRepo)
+    public ProjectController(IProjectRepo projectRepo, IMapper mapper, IProjectDetailRepo projectDetailRepo, ILanguageRepo languageRepo, AppDbContext context)
     {
         _projectRepo = projectRepo;
         _mapper = mapper;
         _projectDetailRepo = projectDetailRepo;
         _languageRepo = languageRepo;
+        _context = context;
     }
 
 
@@ -70,36 +74,11 @@ public class ProjectController : ControllerBase
     }
     
     
-    private ProjectInfo ProjectInfoMapper(CreateProjectView createProjectCreate)
-    {
-        ProjectInfo projectInfo = new ProjectInfo()
-        {
-            Name = createProjectCreate.Name,
-            LanguageId = createProjectCreate.DefaultLanguageId,
-            CreatedAt = createProjectCreate.CreatedAt,
-            UpdatedAt = createProjectCreate.UpdatedAt
-        };
-        return projectInfo;
-    }
-
-    private GetProjectView ProjectViewMapper(ProjectInfo projectInfo)
-    {
-        GetProjectView createProjectView = new GetProjectView()
-        {
-            Name = projectInfo.Name,
-            CreatedAt = projectInfo.CreatedAt,
-            UpdatedAt = projectInfo.UpdatedAt,
-            ProjectDetail = projectInfo.ProjectDetail,
-            AvialableLanguages = projectInfo.Languages
-        };
-        return createProjectView;
-    }
+  
     
     
     
     [HttpPost]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
     public async Task<IActionResult> CreateProject([FromBody] CreateProjectView create)
     {
         if (create == null)
@@ -114,21 +93,26 @@ public class ProjectController : ControllerBase
         
         var projectInfo =  ProjectInfoMapper(create);
         projectInfo.CreatedBy = userId;
-        
-        var projectDetail = await _projectDetailRepo.GetById(create.ProjectDetailId);
-        if (projectDetail is not null)
+
+        var projectDetials = _projectDetailRepo.GetAll();
+
+        foreach (var detial in projectDetials)
         {
-            projectInfo.ProjectDetail = projectDetail;
+            if (projectInfo.ProjectDetail is null)
+                projectInfo.ProjectDetail = new List<ProjectDetail>();
+            
+            if(create.ProjectDetailIds.Contains(detial.Id))
+                projectInfo.ProjectDetail.Add(detial);
         }
 
         var languages =  _languageRepo.GetAll();
 
         foreach (var language in languages)
         {
-            if (projectInfo.Languages is null)
+            if(projectInfo.Languages is null)
                 projectInfo.Languages = new List<Language>();
-            
-            projectInfo.Languages.Add(language);
+            if(create.AvailableLanguageIds.Contains(language.Id))
+                projectInfo.Languages.Add(language);
         }
         
         if (project)
@@ -149,29 +133,94 @@ public class ProjectController : ControllerBase
         return Ok("Successfully created");
     }
 
-    [HttpPut("{projectId}")]
-    public IActionResult UpdateProject(int projectId, [FromBody] UpdateProjectView updatedProject)
+    [HttpPut("{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> UpdateProject(int id, [FromBody] UpdateProjectView update)
     {
-        if (updatedProject == null)
-            return BadRequest(ModelState);
-    
-        if (projectId != updatedProject.Id)
-            return BadRequest(ModelState);
-    
-        if (!_projectRepo.ProjectExists(projectId))
-            return NotFound();
-    
-        if (!ModelState.IsValid)
-            return BadRequest();
-    
-        var projectMap = _mapper.Map<ProjectInfo>(updatedProject);
-    
-        if (!_projectRepo.UpdateProject(projectMap))
+        var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (update == null || id != update.Id)
+            return BadRequest("Invalid request.");
+        
+        if (string.IsNullOrEmpty(currentUser))
+            return Unauthorized("User not authenticated.");
+
+
+        var existingProject = await _context.Projects.Include(p => p.LanguageId)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (existingProject == null)
+            return NotFound("Project not found.");
+
+        
+        if (!string.Equals(existingProject.CreatedBy, currentUser, StringComparison.OrdinalIgnoreCase))
+            return Forbid();
+
+        
+        existingProject.Name = update.Name;
+        existingProject.LanguageId = update.DefaultLanguageId;
+        existingProject.ProjectDetailId = update.ProjectDetailId;
+        existingProject.UpdatedAt = DateTime.UtcNow;
+        
+        var existingLanguages = existingProject.Languages.ToList();
+        
+        var newLanguages = _context.Languages
+            .Where(lang => update.AvailableLanguageIds.Contains(lang.Id) &&
+                           !existingLanguages.Any(el => el.Id == lang.Id))
+            .ToList();
+        
+        var languagesToRemove = existingLanguages
+            .Where(el => !update.AvailableLanguageIds.Contains(el.Id))
+            .ToList();
+        
+        foreach (var lang in languagesToRemove)
         {
-            ModelState.AddModelError("","Something went wrong while updating");
-            return StatusCode(500, ModelState);
+            existingProject.Languages.Remove(lang);
         }
-    
-        return NoContent();
+
+     
+        foreach (var lang in newLanguages)
+        {
+            existingProject.Languages.Add(lang);
+        }
+
+        
+        await _context.SaveChangesAsync();
+
+        return Ok(existingProject);
     }
+
+
+    #region CreateProjectMapper
+    private ProjectInfo ProjectInfoMapper(CreateProjectView createProjectCreate)
+    {
+        ProjectInfo projectInfo = new ProjectInfo()
+        {
+            Name = createProjectCreate.Name,
+            LanguageId = createProjectCreate.DefaultLanguageId,
+            CreatedAt = createProjectCreate.CreatedAt,
+            UpdatedAt = createProjectCreate.UpdatedAt
+        };
+        return projectInfo;
+    }
+    #endregion
+    #region GetProjectsMannualMapper
+    private GetProjectView ProjectViewMapper(ProjectInfo projectInfo)
+    {
+        GetProjectView createProjectView = new GetProjectView()
+        {
+            Name = projectInfo.Name,
+            CreatedAt = projectInfo.CreatedAt,
+            UpdatedAt = projectInfo.UpdatedAt,
+            AvialableProjectDetails = projectInfo.ProjectDetail,
+            AvialableLanguages = projectInfo.Languages
+        };
+        return createProjectView;
+    }
+    #endregion
+
+   
 }

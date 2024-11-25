@@ -6,7 +6,6 @@ namespace Localizard.Domain.ViewModel;
 
 public class CreateTranslationView
 {
-    public string Key { get; set; }
     public int LanguageId { get; set; }
     public string Text { get; set; }
    

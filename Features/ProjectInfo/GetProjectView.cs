@@ -9,6 +9,6 @@ public class GetProjectView
     public DateTime? UpdatedAt { get; set; }
     public Language DefaultLanguage { get; set; } 
     public ICollection<Language> AvialableLanguages { get; set; } = null!;
-    public  ProjectDetail ProjectDetail { get; set; }
+    public  ICollection<ProjectDetail> AvialableProjectDetails { get; set; }
     
 }

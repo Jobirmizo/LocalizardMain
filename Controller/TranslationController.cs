@@ -67,7 +67,7 @@ public class TranslationController : ControllerBase
             return BadRequest(ModelState);
 
         var translation = _translationRepo.GetAll()
-            .Where(l => l.Key.Trim().ToUpper() == create.Key.TrimEnd().ToUpper())
+            .Where(l => l.Id == create.LanguageId)
             .FirstOrDefault();
 
         if (translation != null)
@@ -138,7 +138,6 @@ public class TranslationController : ControllerBase
     {
         GetTranslationView getTranslates = new GetTranslationView()
         {
-            Key = translation.Key,
             Text = translation.Text,
             Language = new LanguageView()
             {

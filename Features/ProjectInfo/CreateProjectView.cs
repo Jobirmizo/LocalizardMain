@@ -8,8 +8,8 @@ namespace Localizard.Domain.ViewModel;
 public class CreateProjectView
 {
     public string Name { get; set; }
-    public int DefaultLanguageId { get; set; } 
-    public int ProjectDetailId { get; set; }
+    public int DefaultLanguageId { get; set; }
+    public int[] ProjectDetailIds { get; set; } = null!;
     public int[] AvailableLanguageIds { get; set; } = null!;
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

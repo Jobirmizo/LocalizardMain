@@ -15,7 +15,7 @@ public class ProjectRepo : IProjectRepo
 
     public  ICollection<ProjectInfo> GetAllProjects()
     {
-        return _context.Projects.Include(x=>x.ProjectDetail).Include(x=>x.Languages).OrderBy(p => p.Id).ToList();
+        return _context.Projects.Include(x=>x.ProjectDetail).Include(x => x.ProjectDetail).Include(x=>x.Languages).OrderBy(p => p.Id).ToList();
     }
 
     public async Task<ProjectInfo> GetById(int id)

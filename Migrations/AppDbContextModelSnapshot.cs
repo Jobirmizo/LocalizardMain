@@ -3,7 +3,6 @@ using System;
 using Localizard.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,11 +11,9 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Localizard.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241122105737_IdentityUser")]
-    partial class IdentityUser
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,15 +111,13 @@ namespace Localizard.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("ProjectDetailId")
+                    b.Property<int>("ProjectDetailId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProjectDetailId");
 
                     b.ToTable("Projects");
                 });
@@ -134,10 +129,6 @@ namespace Localizard.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("LanguageId")
                         .HasColumnType("integer");
@@ -178,6 +169,21 @@ namespace Localizard.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ProjectDetailProjectInfo", b =>
+                {
+                    b.Property<int>("ProjectDetailId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProjectInfosId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProjectDetailId", "ProjectInfosId");
+
+                    b.HasIndex("ProjectInfosId");
+
+                    b.ToTable("ProjectDetailProjectInfo");
+                });
+
             modelBuilder.Entity("ProjectDetailTranslation", b =>
                 {
                     b.Property<int>("ProjectDetailsId")
@@ -208,15 +214,6 @@ namespace Localizard.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>
-                {
-                    b.HasOne("Localizard.Domain.Entites.ProjectDetail", "ProjectDetail")
-                        .WithMany()
-                        .HasForeignKey("ProjectDetailId");
-
-                    b.Navigation("ProjectDetail");
-                });
-
             modelBuilder.Entity("Localizard.Domain.Entites.Translation", b =>
                 {
                     b.HasOne("Localizard.Domain.Entites.Language", "Language")
@@ -226,6 +223,21 @@ namespace Localizard.Migrations
                         .IsRequired();
 
                     b.Navigation("Language");
+                });
+
+            modelBuilder.Entity("ProjectDetailProjectInfo", b =>
+                {
+                    b.HasOne("Localizard.Domain.Entites.ProjectDetail", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Localizard.Domain.Entites.ProjectInfo", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectInfosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProjectDetailTranslation", b =>

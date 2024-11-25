@@ -25,29 +25,7 @@ public class ProjectDetailController : ControllerBase
         _projectDetailRepo = projectDetailRepo;
         _translationRepo = translationRepo;
     }
-
-    private GetProjectDetailView GetDetailMapper(ProjectDetail detail)
-    {
-        GetProjectDetailView detailView = new GetProjectDetailView()
-        {
-            Key = detail.Key,
-            Description = detail.Description,
-            Tag = detail.Tag,
-            AvailableTranslations = detail.Translation
-        };
-        return detailView;
-    }
-
-    private ProjectDetail CraeteDetailMapper(CreateProjectDetailView create)
-    {
-        ProjectDetail detailView = new ProjectDetail()
-        {
-            Key = create.Key,
-            Description = create.Description,
-            Tag = create.Tag
-        };
-        return detailView;
-    }
+   
 
     [HttpGet]
     public IActionResult GetAllProjectDetails()
@@ -88,12 +66,15 @@ public class ProjectDetailController : ControllerBase
         var projectDetail = CraeteDetailMapper(detail);
         
         var translations = _translationRepo.GetAll();
+        
         foreach (var translate in translations)
         {
             if (projectDetail.Translation is null)
                 projectDetail.Translation = new List<Translation>();
             
-            projectDetail.Translation.Add(translate);
+            if(detail.TranslationIds.Contains(translate.Id))
+                projectDetail.Translation.Add(translate);
+            
         }
 
         if (checkDetail)
@@ -158,5 +139,31 @@ public class ProjectDetailController : ControllerBase
 
         return NoContent();
     }
+    
+    #region GetDetailMapper
+    private GetProjectDetailView GetDetailMapper(ProjectDetail detail)
+    {
+        GetProjectDetailView detailView = new GetProjectDetailView()
+        {
+            Key = detail.Key,
+            Description = detail.Description,
+            Tag = detail.Tag,
+            AvailableTranslations = detail.Translation
+        };
+        return detailView;
+    }
+    #endregion
+    #region CreateDetailMapper
+    private ProjectDetail CraeteDetailMapper(CreateProjectDetailView create)
+    {
+        ProjectDetail detailView = new ProjectDetail()
+        {
+            Key = create.Key,
+            Description = create.Description,
+            Tag = create.Tag
+        };
+        return detailView;
+    }
+    #endregion
 
 }
