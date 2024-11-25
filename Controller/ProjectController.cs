@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
 
@@ -72,9 +73,31 @@ public class ProjectController : ControllerBase
 
         return Ok(project);
     }
-    
-    
-  
+
+
+    [HttpGet]
+    public async Task<IActionResult> ProjectsPagination(int page = 1, int pageSize = 10)
+    {
+        var totalCount = _projectRepo.GetAllProjects().Count();
+        var totalPages = (int)Math.Ceiling((decimal)totalCount / pageSize);
+
+        var projectsPage = _projectRepo
+            .GetAllProjects()
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var response = new
+        {
+            page,
+            pageSize,
+            totalCount,
+            totalPages,
+            data = projectsPage
+        };
+
+        return Ok(response);
+    }
     
     
     
@@ -140,57 +163,7 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateProject(int id, [FromBody] UpdateProjectView update)
     {
-        var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        if (update == null || id != update.Id)
-            return BadRequest("Invalid request.");
-        
-        if (string.IsNullOrEmpty(currentUser))
-            return Unauthorized("User not authenticated.");
-
-
-        var existingProject = await _context.Projects.Include(p => p.LanguageId)
-            .FirstOrDefaultAsync(p => p.Id == id);
-
-        if (existingProject == null)
-            return NotFound("Project not found.");
-
-        
-        if (!string.Equals(existingProject.CreatedBy, currentUser, StringComparison.OrdinalIgnoreCase))
-            return Forbid();
-
-        
-        existingProject.Name = update.Name;
-        existingProject.LanguageId = update.DefaultLanguageId;
-        existingProject.ProjectDetailId = update.ProjectDetailId;
-        existingProject.UpdatedAt = DateTime.UtcNow;
-        
-        var existingLanguages = existingProject.Languages.ToList();
-        
-        var newLanguages = _context.Languages
-            .Where(lang => update.AvailableLanguageIds.Contains(lang.Id) &&
-                           !existingLanguages.Any(el => el.Id == lang.Id))
-            .ToList();
-        
-        var languagesToRemove = existingLanguages
-            .Where(el => !update.AvailableLanguageIds.Contains(el.Id))
-            .ToList();
-        
-        foreach (var lang in languagesToRemove)
-        {
-            existingProject.Languages.Remove(lang);
-        }
-
      
-        foreach (var lang in newLanguages)
-        {
-            existingProject.Languages.Add(lang);
-        }
-
-        
-        await _context.SaveChangesAsync();
-
-        return Ok(existingProject);
     }
 
 
