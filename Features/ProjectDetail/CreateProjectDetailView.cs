@@ -7,7 +7,9 @@ namespace Localizard.Domain.ViewModel;
 public class CreateProjectDetailView
 {
     public string Key { get; set; }
-    public int[] TranslationIds { get; set; } = null!;
+    public int ProjectInfoId { get; set; }
+    public List<CreateTranslationView> Translations { get; set; }
     public string Description { get; set; }
     public string Tag { get; set; }
+    
 }

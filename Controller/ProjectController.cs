@@ -185,19 +185,10 @@ public class ProjectController : ControllerBase
             return StatusCode(422, ModelState);
         }
         
-        existingProject.Name = update.Name;
+        existingProject.Name = update.Name; 
         existingProject.LanguageId = update.DefaultLanguageId;
-        existingProject.ProjectDetailId = update.ProjectDetailIds.FirstOrDefault(); 
         existingProject.UpdatedAt = DateTime.UtcNow;
         
-        var projectDetails = _projectDetailRepo.GetAll();
-        existingProject.ProjectDetail.Clear();
-        
-        foreach (var detail in projectDetails)
-        {
-            if (update.ProjectDetailIds.Contains(detail.Id))
-                existingProject.ProjectDetail.Add(detail);
-        }
         
         var languages = _languageRepo.GetAll();
         existingProject.Languages.Clear(); 
@@ -243,7 +234,6 @@ public class ProjectController : ControllerBase
             Name = projectInfo.Name,
             CreatedAt = projectInfo.CreatedAt,
             UpdatedAt = projectInfo.UpdatedAt,
-            AvialableProjectDetails = projectInfo.ProjectDetail,
             AvialableLanguages = projectInfo.Languages
         };
         return createProjectView;

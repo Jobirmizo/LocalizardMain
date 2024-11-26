@@ -64,20 +64,21 @@ public class ProjectDetailController : ControllerBase
             return BadRequest(ModelState);
 
         var checkDetail = _projectDetailRepo.GetAll().Select(d => d.Key).Contains(detail.Key);
+        
+        foreach (var translate in detail.Translations)
+        {
+            var existingTranslation = _translationRepo.GetAll()
+                .FirstOrDefault(t => t.LanguageId == translate.LanguageId && t.Text == translate.Text);
+
+            if (existingTranslation != null)
+            {
+                ModelState.AddModelError("", $"Translation already exists for language {translate.LanguageId}.");
+                return StatusCode(422, ModelState);
+            }
+        }
+        
         var projectDetail = CraeteDetailMapper(detail);
         
-        var translations = _translationRepo.GetAll();
-        
-        foreach (var translate in translations)
-        {
-            if (projectDetail.Translation is null)
-                projectDetail.Translation = new List<Translation>();
-            
-            if(detail.TranslationIds.Contains(translate.Id))
-                projectDetail.Translation.Add(translate);
-            
-        }
-
         if (checkDetail)
         {
             ModelState.AddModelError("","Project Detail already exists!");
@@ -165,11 +166,13 @@ public class ProjectDetailController : ControllerBase
     {
         GetProjectDetailView detailView = new GetProjectDetailView()
         {
+            ProjectInfoId = detail.ProjectInfoId,
             Key = detail.Key,
             Description = detail.Description,
             Tag = detail.Tag,
             AvailableTranslations = detail.Translation
         };
+        
         return detailView;
     }
     #endregion
@@ -180,8 +183,24 @@ public class ProjectDetailController : ControllerBase
         {
             Key = create.Key,
             Description = create.Description,
-            Tag = create.Tag
+            Tag = create.Tag,
+            ProjectInfoId = create.ProjectInfoId,
+            Translation = new List<Translation>()
         };
+        if (create.Translations != null)
+        {
+            foreach (var translate in create.Translations)
+            {
+                var translation = new Translation()
+                {
+                    LanguageId = translate.LanguageId,
+                    Text = translate.Text
+                };
+                
+                detailView.Translation.Add(translation);
+            }
+        }
+
         return detailView;
     }
     #endregion

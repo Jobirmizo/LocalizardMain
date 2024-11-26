@@ -5,6 +5,7 @@ using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
@@ -16,11 +17,13 @@ public class UserController : ControllerBase
     
     private readonly IUserManager _userManager;
     private readonly IMapper _mapper;
+    private readonly AppDbContext _context;
     
-    public UserController(IUserManager userManager, IMapper mapper )
+    public UserController(IUserManager userManager, IMapper mapper, AppDbContext context)
     {
         _userManager = userManager;
         _mapper = mapper;
+        _context = context;
     }
     
     
@@ -50,59 +53,36 @@ public class UserController : ControllerBase
         return Ok(user);
     }
     
-    [HttpPost]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
-    public IActionResult CreateUser([FromBody] UserView userCreate)
-    {
-        if (userCreate == null)
-            return BadRequest(ModelState);
-
-        var user = _userManager.GetAllUsers()
-            .Where(p => p.Username.Trim().ToUpper() == userCreate.Username.TrimEnd().ToUpper())
-            .FirstOrDefault();
-
-        if (user != null)
-        {
-            ModelState.AddModelError("", "Project already exist!");
-            return StatusCode(422, ModelState);
-        }
-
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var userMap = _mapper.Map<User>(userCreate);
-
-        if (!_userManager.CreateUser(userMap))
-        {
-            ModelState.AddModelError("", "Something went wrong! while saving");
-            return StatusCode(500, ModelState);
-        }
-
-        return Ok("Successfully created");
-    }
 
     [HttpPut]
-    public IActionResult UpdateUser(int userId, [FromBody] User updateUser)
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] User update)
     {
-        if (updateUser == null)
-            return BadRequest(ModelState);
-
-        if (userId != updateUser.Id)
-            return BadRequest(ModelState);
-
-        if (!_userManager.UserExists(userId))
-            return NotFound();
-
-        if (!ModelState.IsValid)
-            return BadRequest();
-        if (!_userManager.UpdateUser(updateUser))
+        if (update == null || !ModelState.IsValid)
         {
-            ModelState.AddModelError("", "Something went wrong while updating the user");
+            return BadRequest("Invalid Request");
+        }
+
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == update.Id);
+        if (user == null)
+            return NotFound(new { message = "User not found" });
+
+        user.Username = update.Username ?? user.Username;
+        user.Role = update.Role ?? user.Role;
+
+        if (!string.IsNullOrEmpty(update.Password))
+        {
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(update.Password);
+            user.Password = hashedPassword;
+        }
+        
+          
+        if (!_userManager.UpdateUser(user))
+        {
+            ModelState.AddModelError("", "Something went wrong while saving the user.");
             return StatusCode(500, ModelState);
         }
 
-        return NoContent();
+        return Ok(new { message = "Updated" });
     }
     
     [HttpDelete]

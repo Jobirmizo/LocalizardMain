@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Localizard.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCraete : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,6 +34,7 @@ namespace Localizard.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Key = table.Column<string>(type: "text", nullable: false),
                     TranslationId = table.Column<int>(type: "integer", nullable: false),
+                    ProjectInfoId = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     Tag = table.Column<string>(type: "text", nullable: false),
                     PlatformCategories = table.Column<int>(type: "integer", nullable: false)
@@ -82,7 +83,6 @@ namespace Localizard.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Key = table.Column<string>(type: "text", nullable: false),
                     LanguageId = table.Column<int>(type: "integer", nullable: false),
                     Text = table.Column<string>(type: "text", nullable: false)
                 },

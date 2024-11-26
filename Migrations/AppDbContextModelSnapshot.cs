@@ -77,6 +77,9 @@ namespace Localizard.Migrations
                     b.Property<int>("PlatformCategories")
                         .HasColumnType("integer");
 
+                    b.Property<int>("ProjectInfoId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Tag")
                         .IsRequired()
                         .HasColumnType("text");

@@ -18,7 +18,7 @@ public class ProjectInfo
     public DateTime? CreatedAt { get; set; }
     [JsonIgnore]
     public DateTime? UpdatedAt { get; set; }
-    public int ProjectDetailId { get; set; }
+    
     public virtual ICollection<ProjectDetail> ProjectDetail { get; set; }
     public virtual ICollection<Language> Languages { get; set; }
 }

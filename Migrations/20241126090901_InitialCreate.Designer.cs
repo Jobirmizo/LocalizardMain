@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Localizard.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241125091336_TranslationKeyRemoved")]
-    partial class TranslationKeyRemoved
+    [Migration("20241126090901_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,6 +78,9 @@ namespace Localizard.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("PlatformCategories")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProjectInfoId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Tag")

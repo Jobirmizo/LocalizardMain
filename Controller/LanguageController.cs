@@ -3,6 +3,7 @@ using Localizard.DAL.Repositories;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Localizard.Controller;
@@ -78,29 +79,39 @@ public class LanguageController : ControllerBase
     }
 
     [HttpPut]
-    public IActionResult UpdateLanguage(int languageId, [FromBody] UpdateLanguageView updateLanguage)
+    public async Task<IActionResult> UpdateLanguage(int id, [FromBody] UpdateLanguageView update)
     {
-        if (updateLanguage == null)
+        if (update == null)
             return BadRequest(ModelState);
 
-        if (languageId != updateLanguage.Id)
-            return BadRequest(ModelState);
+        var checkLanguage = await _languageRepo.GetById(id);
 
-        if (!_languageRepo.LanguageExists(languageId))
-            return NotFound();
+        if (checkLanguage == null)
+            return NotFound($"Language alreadyExist");
 
-        if (!ModelState.IsValid)
-            return BadRequest();
+        var languageExists = _languageRepo.GetAll().Any(l => l.LanguageCode == update.LanguageCode && l.Id != id);
 
-        var languageMap = _mapper.Map<Language>(updateLanguage);
-
-        if (!_languageRepo.UpdateLanguage(languageMap))
+      
+        if (languageExists)
         {
-            ModelState.AddModelError("","Something went wrong while creating language");
+            ModelState.AddModelError("","Same language already exists!");
+            return StatusCode(422, ModelState);
+        }
+
+        checkLanguage.Name = update.Name;
+        checkLanguage.LanguageCode = update.LanguageCode;
+        
+        
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (!_languageRepo.UpdateLanguage(checkLanguage))
+        {
+            ModelState.AddModelError("","Something went wrong while saving Language");
             return StatusCode(500, ModelState);
         }
 
-        return NoContent();
+        return Ok("Updated");
     }
     
     
