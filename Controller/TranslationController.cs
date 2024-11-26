@@ -6,7 +6,9 @@ using Localizard.DAL.Repositories;
 using Localizard.DAL.Repositories.Implementations;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
+using Localizard.Features.Translation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -19,11 +21,13 @@ public class TranslationController : ControllerBase
 
     private readonly ITranslationRepo _translationRepo;
     private readonly IMapper _mapper;
+    private readonly ILanguageRepo _languageRepo;
     
-    public TranslationController(IMapper mapper, ITranslationRepo translationRepo)
+    public TranslationController(IMapper mapper, ITranslationRepo translationRepo, ILanguageRepo languageRepo)
     {
         _mapper = mapper;
         _translationRepo = translationRepo;
+        _languageRepo = languageRepo;
     }
     
     
@@ -91,27 +95,37 @@ public class TranslationController : ControllerBase
     }
     
     [HttpPut]
-    public IActionResult UpdateTranslation(int translationId, [FromBody] Translation updateTranslation)
+    public async Task<IActionResult> UpdateTranslation(int id, [FromBody] UpdateTranslationView update)
     {
-        if (updateTranslation == null)
+        if (update == null)
             return BadRequest(ModelState);
 
-        if (translationId != updateTranslation.Id)
-            return BadRequest(ModelState);
+        var existingTranslation = await _translationRepo.GetById(id);
 
-        if (!_translationRepo.TranslationExists(translationId))
-            return NotFound();
+        if (existingTranslation == null)
+            return NotFound("there is no such translation");
+
+        var checkTranslation = _translationRepo.GetAll().Any(t => t.Id == update.Id && t.Id != id);
+
+        if (checkTranslation)
+        {
+            ModelState.AddModelError("","Translation already exist, check it again!");
+            return StatusCode(422, ModelState);
+        }
+
+        existingTranslation.Text = update.Text;
+        existingTranslation.LanguageId = update.LanguageId;
 
         if (!ModelState.IsValid)
             return BadRequest();
-        if (!_translationRepo.UpdateTranslation(updateTranslation))
+
+        if (!_translationRepo.UpdateTranslation(existingTranslation))
         {
-            ModelState.AddModelError("", "Something went wrong while updating the Translation");
+            ModelState.AddModelError("","Something went wrong while updating the translation");
             return StatusCode(500, ModelState);
         }
 
-        return NoContent();
-
+        return Ok("updated)");
     }
 
     [HttpDelete]

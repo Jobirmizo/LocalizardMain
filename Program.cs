@@ -85,6 +85,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 #endregion
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") 
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+
 
 var app = builder.Build();
 
@@ -100,6 +111,7 @@ app.MapIdentityApi<IdentityUser>();
 app.UseHttpsRedirection();
 
 app.UseRouting();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

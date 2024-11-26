@@ -4,6 +4,7 @@ using Localizard.DAL.Repositories;
 using Localizard.DAL.Repositories.Implementations;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -96,29 +97,48 @@ public class ProjectDetailController : ControllerBase
     }
     
     [HttpPut]
-    public IActionResult UpdateProjectDetail(int projectDetailId, [FromBody] UpdateProjectDetailView updatedProject)
+    public async Task<IActionResult> UpdateProjectDetail(int id, [FromBody] UpdateProjectDetailView update)
     {
-        if (updatedProject == null)
+        if (update == null)
             return BadRequest(ModelState);
-    
-        if (projectDetailId != updatedProject.Id)
-            return BadRequest(ModelState);
-    
-        if (!_projectDetailRepo.ProjectDetailExist(projectDetailId))
-            return NotFound();
-    
-        if (!ModelState.IsValid)
-            return BadRequest();
-    
-        var mappedProject = _mapper.Map<ProjectDetail>(updatedProject);
-    
-        if (!_projectDetailRepo.UpdateProjectDetail(mappedProject))
+
+        var existingDetail = await _projectDetailRepo.GetById(id);
+
+        if (existingDetail == null)
+            return NotFound("there is no such detial");
+
+        var projectDetialExists = _projectDetailRepo.GetAll().Any(x => x.Key == update.Key && x.Id != id);
+
+        if (projectDetialExists)
         {
-            ModelState.AddModelError("","Something went wrong while updating");
+            ModelState.AddModelError("","Project Detail already exist, check it again!");
+            return StatusCode(422, ModelState);
+        }
+
+        existingDetail.Key = update.Key;
+        existingDetail.Description = update.Description;
+        existingDetail.Tag = update.Tag;
+
+        var translations = _translationRepo.GetAll();
+        existingDetail.Translation.Clear();
+
+        foreach (var translate in translations)
+        {
+            if (update.TranslationIds.Contains(translate.Id)) 
+                existingDetail.Translation.Add(translate);
+        }
+        
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        
+        if (!_projectDetailRepo.UpdateProjectDetail(existingDetail))
+        {
+            ModelState.AddModelError("", "Something went wrong while saving the project Detail.");
             return StatusCode(500, ModelState);
         }
-    
-        return NoContent();
+
+        return Ok("Successfully updated the project.");
     }
     
     [HttpDelete]

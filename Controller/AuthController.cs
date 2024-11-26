@@ -10,6 +10,7 @@ using Localizard.Domain.ViewModel;
 using Localizard.Service;
 using Localizard.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -57,7 +58,8 @@ public class AuthController : ControllerBase
         var token = _tokenService.GenerateJwtToken(user);
         var response = new AuthResponseView.AuthResponse(token, user.Username, user.Role);
         
-        return Ok(token);
+        return Ok(new
+        {token, user.Role});
     }
     
     [AllowAnonymous]
