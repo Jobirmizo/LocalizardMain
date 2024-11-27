@@ -33,9 +33,9 @@ public class ProjectController : ControllerBase
         _context = context;
     }
 
-
+   
     [HttpGet]
-    public  async Task<IActionResult> GetAllProjects(int page = 1 , int pageSize = 10)
+    public async Task<IActionResult> GetAllProjects([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -44,51 +44,56 @@ public class ProjectController : ControllerBase
         var projects = _projectRepo.GetAllProjects()
             .Where(p => p.CreatedBy == userId)
             .ToList();
-
-        var totalCount = projects.Count();
-        if (totalCount == 0)
-            return NotFound($"No projects found for the current user: {userId}");
-
-        var projectsPage = projects.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        
+        if (pageNumber <= 0 || pageSize <= 0)
+            return BadRequest("PageNumber and PageSize must be greater than zero.");
+        
+        var query = _projectRepo.GetAllProjects()
+            .Where(p => p.CreatedBy == userId);
+        
+        var totalProjects = query.Count();
         
         if (!projects.Any())
             return NotFound("No projects found for the current user.");
         
+        var pagedProjects = query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
         
         var projectInfoViews = new List<GetProjectView>(); 
-        foreach (var project in projectsPage)
+        
+        foreach (var project in projects)
         {
             var projectinfoView = ProjectViewMapper(project);
-            projectinfoView.DefaultLanguage = await _languageRepo.GetById(project.LanguageId);
             projectInfoViews.Add(projectinfoView);
         }
 
-        var response = new
-        {
-            currentPage = page,
-            pageSize,
-            totalCount,
-            totalPages = (int)Math.Ceiling((decimal) totalCount / pageSize),
-            data = projectInfoViews,
-        };
+        var languages = _languageRepo.GetAll();
         
-        return Ok(response);
+        
+        return Ok(new
+        {
+            TotalCount = totalProjects,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling(totalProjects / (double)pageSize),
+            Projects = projectInfoViews
+        });
     }
 
     
-   
     [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
-        if (!_projectRepo.ProjectExists(id))
-            return NotFound();
-
         var project = await _projectRepo.GetById(id);
 
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        if (project == null)
+            return NotFound(ModelState);
 
-        return Ok(project);
+        var projectView = ProjectViewMapper(project);
+
+        return Ok(projectView);
     }
     
     
@@ -212,7 +217,8 @@ public class ProjectController : ControllerBase
             Name = createProjectCreate.Name,
             LanguageId = createProjectCreate.DefaultLanguageId,
             CreatedAt = createProjectCreate.CreatedAt,
-            UpdatedAt = createProjectCreate.UpdatedAt
+            UpdatedAt = createProjectCreate.UpdatedAt,
+            
         };
         return projectInfo;
     }
@@ -222,10 +228,12 @@ public class ProjectController : ControllerBase
     {
         GetProjectView createProjectView = new GetProjectView()
         {
+            Id = projectInfo.Id,
             Name = projectInfo.Name,
             CreatedAt = projectInfo.CreatedAt,
             UpdatedAt = projectInfo.UpdatedAt,
-            AvialableLanguages = projectInfo.Languages
+            DefaultLanguageId = projectInfo.LanguageId,
+            AvailableLanguageIds = projectInfo.Languages.Select(lang => lang.Id).ToArray()
         };
         return createProjectView;
     }

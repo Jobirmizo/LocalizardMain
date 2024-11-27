@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -36,7 +37,7 @@ namespace Localizard.Migrations
                     TranslationId = table.Column<int>(type: "integer", nullable: false),
                     ProjectInfoId = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    Tag = table.Column<string>(type: "text", nullable: false),
+                    TagIds = table.Column<List<int>>(type: "integer[]", nullable: false),
                     PlatformCategories = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -65,6 +66,7 @@ namespace Localizard.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SymbolKey = table.Column<string>(type: "text", nullable: false),
                     LanguageId = table.Column<int>(type: "integer", nullable: false),
                     Text = table.Column<string>(type: "text", nullable: false)
                 },

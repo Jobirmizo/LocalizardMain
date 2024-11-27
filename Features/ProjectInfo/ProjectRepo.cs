@@ -20,12 +20,12 @@ public class ProjectRepo : IProjectRepo
 
     public async Task<ProjectInfo> GetById(int id)
     {
-        return await _context.Projects.FirstOrDefaultAsync(p => p.Id == id);
+        return await _context.Projects.Include(l => l.Languages).FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public bool ProjectExists(int id)
     {
-        return _context.Users.Any(p => p.Id == id);
+        return _context.Projects.Any(p => p.Id == id);
     }
 
     public bool CreateProject(ProjectInfo projectInfo)

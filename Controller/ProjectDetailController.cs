@@ -3,6 +3,7 @@ using Localizard.DAL;
 using Localizard.DAL.Repositories;
 using Localizard.DAL.Repositories.Implementations;
 using Localizard.Domain.Entites;
+using Localizard.Domain.Enums;
 using Localizard.Domain.ViewModel;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -19,12 +20,15 @@ public class ProjectDetailController : ControllerBase
     private readonly IMapper _mapper;
     private readonly IProjectDetailRepo _projectDetailRepo;
     private readonly ITranslationRepo _translationRepo;
-    public ProjectDetailController(IMapper mapper, IProjectDetailRepo projectDetail, IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo)
+    private readonly ITagRepo _tag;
+    public ProjectDetailController(IMapper mapper, IProjectDetailRepo projectDetail, 
+        IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo, ITagRepo tag)
     {
         _mapper = mapper;
         _projectDetail = projectDetail;
         _projectDetailRepo = projectDetailRepo;
         _translationRepo = translationRepo;
+        _tag = tag;
     }
    
 
@@ -64,6 +68,11 @@ public class ProjectDetailController : ControllerBase
             return BadRequest(ModelState);
 
         var checkDetail = _projectDetailRepo.GetAll().Select(d => d.Key).Contains(detail.Key);
+        var validTagIds = Enum.GetValues(typeof(TagEnum)).Cast<int>();
+        var invalidTags = detail.TagIds.Except(validTagIds).ToList();
+        
+        if (invalidTags.Any())
+            return BadRequest($"Invalid tag IDs: {string.Join(", ", invalidTags)}");
         
         foreach (var translate in detail.Translations)
         {
@@ -76,6 +85,7 @@ public class ProjectDetailController : ControllerBase
                 return StatusCode(422, ModelState);
             }
         }
+        
         
         var projectDetail = CraeteDetailMapper(detail);
         
@@ -118,7 +128,6 @@ public class ProjectDetailController : ControllerBase
 
         existingDetail.Key = update.Key;
         existingDetail.Description = update.Description;
-        existingDetail.Tag = update.Tag;
 
         var translations = _translationRepo.GetAll();
         existingDetail.Translation.Clear();
@@ -161,8 +170,15 @@ public class ProjectDetailController : ControllerBase
             ProjectInfoId = detail.ProjectInfoId,
             Key = detail.Key,
             Description = detail.Description,
-            Tag = detail.Tag,
-            AvailableTranslations = detail.Translation
+            AvailableTranslations = detail.Translation,
+            Tags = detail.TagIds
+                .Where(t => Enum.IsDefined(typeof(TagEnum), t))
+                .Select(t => new GetTagView()
+                {
+                    Id = t,
+                    Name = Enum.GetName(typeof(TagEnum), t)
+                })
+                .ToList()
         };
         
         return detailView;
@@ -175,9 +191,9 @@ public class ProjectDetailController : ControllerBase
         {
             Key = create.Key,
             Description = create.Description,
-            Tag = create.Tag,
             ProjectInfoId = create.ProjectInfoId,
-            Translation = new List<Translation>()
+            Translation = new List<Translation>(),
+            TagIds = create.TagIds,
         };
         if (create.Translations != null)
         {
@@ -185,6 +201,7 @@ public class ProjectDetailController : ControllerBase
             {
                 var translation = new Translation()
                 {
+                    SymbolKey = translate.SymbolKey,
                     LanguageId = translate.LanguageId,
                     Text = translate.Text
                 };

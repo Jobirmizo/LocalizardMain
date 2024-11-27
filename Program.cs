@@ -39,6 +39,7 @@ builder.Services.AddScoped<IProjectRepo, ProjectRepo>();
 builder.Services.AddScoped<IProjectDetailRepo, ProjectDetailRepo>();
 builder.Services.AddScoped<ILanguageRepo, LanguageRepo>();
 builder.Services.AddScoped<ITranslationRepo, TranslationRepo>();
+builder.Services.AddScoped<ITagRepo, TagRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<TokenService>();

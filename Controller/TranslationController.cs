@@ -151,8 +151,10 @@ public class TranslationController : ControllerBase
             GetTranslationView getTranslates = new GetTranslationView()
             {
                 Text = translation.Text,
-                Language = new LanguageView()
+                SymbolKey = translation.SymbolKey,
+                Language = new Language()
                 {
+                    Id = translation.Language.Id,
                     Name = translation.Language.Name,
                     LanguageCode = translation.Language.LanguageCode
                 }
@@ -166,6 +168,7 @@ public class TranslationController : ControllerBase
     {
         Translation translate = new Translation()
         {
+            SymbolKey = create.SymbolKey,
             LanguageId = create.LanguageId,
             Text = create.Text
         };

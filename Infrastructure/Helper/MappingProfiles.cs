@@ -47,7 +47,7 @@ public class MappingProfiles : Profile
         CreateMap<UpdateProjectView, Language>();
         CreateMap<Language, UpdateLanguageView>();
 
-             
+        CreateMap<ProjectInfo, GetProjectView>();
         
         CreateMap<Translation, CreateTranslationView>();
         CreateMap<CreateTranslationView, Translation>();

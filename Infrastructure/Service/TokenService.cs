@@ -36,7 +36,7 @@ public class TokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(1),
+            Expires = DateTime.UtcNow.AddDays(1),
             Issuer = "https://localhost:5063",
             Audience = "https://localhost:5063",
             SigningCredentials = credentials
