@@ -38,9 +38,28 @@ public class ProjectDetailRepo : IProjectDetailRepo
         return Save();
     }
 
-    public bool DeleteProjectDetail(ProjectDetail projectDetail)
+    public bool DeleteProjectDetail(int id)
     {
-        _context.Remove(projectDetail);
+        var detail = _context.ProjectDetails.Include(p => p.ProjectInfos)
+            .Include(t => t.Translation).FirstOrDefault(d => d.Id == id);
+
+        if (detail == null)
+        {
+            return false;
+        }
+
+        if (detail.ProjectInfos != null)
+        {
+            _context.Projects.RemoveRange(detail.ProjectInfos);
+        }
+
+        if (detail.Translation != null)
+        {
+            _context.Translations.RemoveRange(detail.Translation);
+        }
+        
+        
+        _context.Remove(detail);
         return Save();
     }
 

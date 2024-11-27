@@ -113,6 +113,19 @@ public class LanguageController : ControllerBase
 
         return Ok("Updated");
     }
+
+    [HttpDelete("{id:int}")]
+    public IActionResult DeleteLanguage(int id)
+    {
+        
+        if (!_languageRepo.DeleteLanguage(id))
+        {
+            return NotFound(new { message = "Language not found or could not be deleted" });
+        }
+
+        return Ok(new { message = "Language deleted successfully" });
+    }
+    
     
     
 }

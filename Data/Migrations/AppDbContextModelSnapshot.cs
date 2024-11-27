@@ -114,13 +114,15 @@ namespace Localizard.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ProjectDetailId")
+                    b.Property<int?>("ProjectDetailId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProjectDetailId");
 
                     b.ToTable("Projects");
                 });
@@ -172,21 +174,6 @@ namespace Localizard.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ProjectDetailProjectInfo", b =>
-                {
-                    b.Property<int>("ProjectDetailId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProjectInfosId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ProjectDetailId", "ProjectInfosId");
-
-                    b.HasIndex("ProjectInfosId");
-
-                    b.ToTable("ProjectDetailProjectInfo");
-                });
-
             modelBuilder.Entity("ProjectDetailTranslation", b =>
                 {
                     b.Property<int>("ProjectDetailsId")
@@ -217,6 +204,13 @@ namespace Localizard.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>
+                {
+                    b.HasOne("Localizard.Domain.Entites.ProjectDetail", null)
+                        .WithMany("ProjectInfos")
+                        .HasForeignKey("ProjectDetailId");
+                });
+
             modelBuilder.Entity("Localizard.Domain.Entites.Translation", b =>
                 {
                     b.HasOne("Localizard.Domain.Entites.Language", "Language")
@@ -226,21 +220,6 @@ namespace Localizard.Migrations
                         .IsRequired();
 
                     b.Navigation("Language");
-                });
-
-            modelBuilder.Entity("ProjectDetailProjectInfo", b =>
-                {
-                    b.HasOne("Localizard.Domain.Entites.ProjectDetail", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Localizard.Domain.Entites.ProjectInfo", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectInfosId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProjectDetailTranslation", b =>
@@ -261,6 +240,11 @@ namespace Localizard.Migrations
             modelBuilder.Entity("Localizard.Domain.Entites.Language", b =>
                 {
                     b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("Localizard.Domain.Entites.ProjectDetail", b =>
+                {
+                    b.Navigation("ProjectInfos");
                 });
 #pragma warning restore 612, 618
         }

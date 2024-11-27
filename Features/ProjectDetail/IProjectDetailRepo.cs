@@ -9,6 +9,6 @@ public interface IProjectDetailRepo
     bool ProjectDetailExist(int id);
     bool CreateProjectDetail(ProjectDetail projectDetail);
     bool UpdateProjectDetail(ProjectDetail projectDetail);
-    bool DeleteProjectDetail(ProjectDetail projectDetail);
+    bool DeleteProjectDetail(int id);
     bool Save();
 }

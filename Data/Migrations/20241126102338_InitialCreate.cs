@@ -45,24 +45,6 @@ namespace Localizard.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Projects",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    LanguageId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedBy = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ProjectDetailId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Projects", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -98,51 +80,26 @@ namespace Localizard.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LanguageProjectInfo",
+                name: "Projects",
                 columns: table => new
                 {
-                    LanguagesId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectInfosId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    LanguageId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedBy = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ProjectDetailId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LanguageProjectInfo", x => new { x.LanguagesId, x.ProjectInfosId });
+                    table.PrimaryKey("PK_Projects", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LanguageProjectInfo_Languages_LanguagesId",
-                        column: x => x.LanguagesId,
-                        principalTable: "Languages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LanguageProjectInfo_Projects_ProjectInfosId",
-                        column: x => x.ProjectInfosId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProjectDetailProjectInfo",
-                columns: table => new
-                {
-                    ProjectDetailId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectInfosId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProjectDetailProjectInfo", x => new { x.ProjectDetailId, x.ProjectInfosId });
-                    table.ForeignKey(
-                        name: "FK_ProjectDetailProjectInfo_ProjectDetails_ProjectDetailId",
+                        name: "FK_Projects_ProjectDetails_ProjectDetailId",
                         column: x => x.ProjectDetailId,
                         principalTable: "ProjectDetails",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProjectDetailProjectInfo_Projects_ProjectInfosId",
-                        column: x => x.ProjectInfosId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -169,20 +126,44 @@ namespace Localizard.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "LanguageProjectInfo",
+                columns: table => new
+                {
+                    LanguagesId = table.Column<int>(type: "integer", nullable: false),
+                    ProjectInfosId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LanguageProjectInfo", x => new { x.LanguagesId, x.ProjectInfosId });
+                    table.ForeignKey(
+                        name: "FK_LanguageProjectInfo_Languages_LanguagesId",
+                        column: x => x.LanguagesId,
+                        principalTable: "Languages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LanguageProjectInfo_Projects_ProjectInfosId",
+                        column: x => x.ProjectInfosId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_LanguageProjectInfo_ProjectInfosId",
                 table: "LanguageProjectInfo",
                 column: "ProjectInfosId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectDetailProjectInfo_ProjectInfosId",
-                table: "ProjectDetailProjectInfo",
-                column: "ProjectInfosId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ProjectDetailTranslation_TranslationId",
                 table: "ProjectDetailTranslation",
                 column: "TranslationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_ProjectDetailId",
+                table: "Projects",
+                column: "ProjectDetailId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Translations_LanguageId",
@@ -197,9 +178,6 @@ namespace Localizard.Migrations
                 name: "LanguageProjectInfo");
 
             migrationBuilder.DropTable(
-                name: "ProjectDetailProjectInfo");
-
-            migrationBuilder.DropTable(
                 name: "ProjectDetailTranslation");
 
             migrationBuilder.DropTable(
@@ -209,10 +187,10 @@ namespace Localizard.Migrations
                 name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "ProjectDetails");
+                name: "Translations");
 
             migrationBuilder.DropTable(
-                name: "Translations");
+                name: "ProjectDetails");
 
             migrationBuilder.DropTable(
                 name: "Languages");

@@ -35,7 +35,7 @@ public class ProjectController : ControllerBase
 
 
     [HttpGet]
-    public  async Task<IActionResult> GetAllProjects()
+    public  async Task<IActionResult> GetAllProjects(int page = 1 , int pageSize = 10)
     {
         var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -44,20 +44,37 @@ public class ProjectController : ControllerBase
         var projects = _projectRepo.GetAllProjects()
             .Where(p => p.CreatedBy == userId)
             .ToList();
+
+        var totalCount = projects.Count();
+        if (totalCount == 0)
+            return NotFound($"No projects found for the current user: {userId}");
+
+        var projectsPage = projects.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         
         if (!projects.Any())
             return NotFound("No projects found for the current user.");
         
         
         var projectInfoViews = new List<GetProjectView>(); 
-        foreach (var project in projects)
+        foreach (var project in projectsPage)
         {
             var projectinfoView = ProjectViewMapper(project);
             projectinfoView.DefaultLanguage = await _languageRepo.GetById(project.LanguageId);
             projectInfoViews.Add(projectinfoView);
         }
-        return Ok(projectInfoViews);
+
+        var response = new
+        {
+            currentPage = page,
+            pageSize,
+            totalCount,
+            totalPages = (int)Math.Ceiling((decimal) totalCount / pageSize),
+            data = projectInfoViews,
+        };
+        
+        return Ok(response);
     }
+
     
    
     [HttpGet("{id}")]
@@ -72,31 +89,6 @@ public class ProjectController : ControllerBase
             return BadRequest(ModelState);
 
         return Ok(project);
-    }
-
-
-    [HttpGet]
-    public async Task<IActionResult> ProjectsPagination(int page = 1, int pageSize = 10)
-    {
-        var totalCount = _projectRepo.GetAllProjects().Count();
-        var totalPages = (int)Math.Ceiling((decimal)totalCount / pageSize);
-
-        var projectsPage = _projectRepo
-            .GetAllProjects()
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-        var response = new
-        {
-            page,
-            pageSize,
-            totalCount,
-            totalPages,
-            data = projectsPage
-        };
-
-        return Ok(response);
     }
     
     
@@ -116,17 +108,6 @@ public class ProjectController : ControllerBase
         
         var projectInfo =  ProjectInfoMapper(create);
         projectInfo.CreatedBy = userId;
-
-        // var projectDetials = _projectDetailRepo.GetAll();
-        //
-        // foreach (var detial in projectDetials)
-        // {
-        //     if (projectInfo.ProjectDetail is null)
-        //         projectInfo.ProjectDetail = new List<ProjectDetail>();
-        //     
-        //     if(create.ProjectDetailIds.Contains(detial.Id))
-        //         projectInfo.ProjectDetail.Add(detial);
-        // }
 
         var languages =  _languageRepo.GetAll();
 
@@ -212,6 +193,16 @@ public class ProjectController : ControllerBase
         return Ok("Successfully updated the project.");
     }
 
+    [HttpDelete("{id}")]
+    public IActionResult DeleteProject(int id)
+    {
+        if (!_projectRepo.DeleteProject(id))
+        {
+            return NotFound(new { message = "Project not found or could not be deleted" });
+        }
+
+        return Ok(new { message = "Project deleted successfully" });
+    }
 
     #region CreateProjectMapper
     private ProjectInfo ProjectInfoMapper(CreateProjectView createProjectCreate)

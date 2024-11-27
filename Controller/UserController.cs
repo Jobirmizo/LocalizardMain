@@ -28,14 +28,29 @@ public class UserController : ControllerBase
     
     
     [HttpGet]
-    public IActionResult GetAllUsers()
+    public IActionResult GetAllUsers(int page = 1, int pageSize = 10)
     {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
         var users = _userManager.GetAllUsers();
-        var mappedUsers = _mapper.Map<List<GetUsersView>>(users);
+        var totalCount = users.Count();
+        var usersPage = users
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+        var mappedUsers = _mapper.Map<List<GetUsersView>>(usersPage);
+        var response = new
+        {
+            currentPage = page,
+            pageSize,
+            totalCount,
+            totalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+            data = mappedUsers,
+        };
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        return Ok(mappedUsers);
+        return Ok(response);
     }
     
         

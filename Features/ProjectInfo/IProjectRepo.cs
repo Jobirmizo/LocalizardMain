@@ -10,5 +10,6 @@ public interface IProjectRepo
     bool ProjectExists(int id);
     bool CreateProject(ProjectInfo projectInfo);
     bool UpdateProject(ProjectInfo projectInfo);
+    bool DeleteProject(int id);
     bool Save();
 }

@@ -66,32 +66,29 @@ public class TranslationController : ControllerBase
     [ProducesResponseType(400)]
     public IActionResult CreateTranslation([FromBody] CreateTranslationView create)
     {
-
         if (create == null)
             return BadRequest(ModelState);
 
-        var translation = _translationRepo.GetAll()
-            .Where(l => l.Id == create.LanguageId)
-            .FirstOrDefault();
+        var checkTranslation = _translationRepo.GetAll().Select(t => t.LanguageId).Contains(create.LanguageId);
 
-        if (translation != null)
+        var translation = CreateTranslationMappper(create);
+
+        if (checkTranslation)
         {
-            ModelState.AddModelError("", "Language already exists");
+            ModelState.AddModelError("","Language already exists");
             return StatusCode(422, ModelState);
         }
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var mappedtranslation = _mapper.Map<Translation>(create);
-
-        if (!_translationRepo.CreateTranslation(mappedtranslation))
+        if (!_translationRepo.CreateTranslation(translation))
         {
-            ModelState.AddModelError("", "Something went wrong");
+            ModelState.AddModelError("","Something went wrong");
             return StatusCode(500, ModelState);
         }
 
-        return Ok("Successfull created;-)");
+        return Ok("Successfull created");
     }
     
     [HttpPut]
@@ -146,20 +143,34 @@ public class TranslationController : ControllerBase
 
         return NoContent();
     }
-
-
-    private GetTranslationView GetTranslationMapper(Translation translation)
-    {
-        GetTranslationView getTranslates = new GetTranslationView()
+    
+    
+    #region GetTranslation
+       private GetTranslationView GetTranslationMapper(Translation translation)
         {
-            Text = translation.Text,
-            Language = new LanguageView()
+            GetTranslationView getTranslates = new GetTranslationView()
             {
-                Name = translation.Language.Name,
-                LanguageCode = translation.Language.LanguageCode
-            }
+                Text = translation.Text,
+                Language = new LanguageView()
+                {
+                    Name = translation.Language.Name,
+                    LanguageCode = translation.Language.LanguageCode
+                }
+            };
+    
+            return getTranslates;
+        }
+    #endregion
+    #region CreateTranlation
+    private Translation CreateTranslationMappper(CreateTranslationView create)
+    {
+        Translation translate = new Translation()
+        {
+            LanguageId = create.LanguageId,
+            Text = create.Text
         };
-
-        return getTranslates;
+        return translate;
     }
+    #endregion
+ 
 }

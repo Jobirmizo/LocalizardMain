@@ -143,22 +143,14 @@ public class ProjectDetailController : ControllerBase
     }
     
     [HttpDelete]
-    public async Task<IActionResult> DeleteProjectDetail(int detailId)
+    public IActionResult DeleteProjectDetail(int id)
     {
-        if (!_projectDetailRepo.ProjectDetailExist(detailId))
-            return NotFound();
-
-        var deleteDetail = await _projectDetailRepo.GetById(detailId);
-
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        if (!_projectDetailRepo.DeleteProjectDetail(deleteDetail))
+        if (!_projectDetailRepo.DeleteProjectDetail(id))
         {
-            ModelState.AddModelError("", "Something went wrong while deleting translation");
+            return NotFound(new { message = "Project Detail not Found!" });
         }
 
-        return NoContent();
+        return Ok(new { message = "Project Detail removed!" });
     }
     
     #region GetDetailMapper

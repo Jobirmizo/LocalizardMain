@@ -11,6 +11,6 @@ public interface ILanguageRepo
     bool LanguageExists(int id);
     bool CteateLanguage(Language language);
     bool UpdateLanguage(Language language);
-    bool Delete(User user);
+    bool DeleteLanguage(int id);
     bool Save();
 }

@@ -41,12 +41,29 @@ public class LanguageRepo : ILanguageRepo
         _context.Update(language);
         return Save();
     }
-    
-    public bool Delete(User user)
-    {
-        throw new NotImplementedException();
-    }
 
+    public bool DeleteLanguage(int id)
+    {
+        var language = _context.Languages
+            .Include(l => l.ProjectInfos)
+            .Include(l => l.Translations)
+            .FirstOrDefault(l => l.Id == id);
+
+        if (language == null)
+        {
+            return false;
+        }
+
+        if (language.Translations != null && language.Translations.Any())
+        {
+            _context.Translations.RemoveRange(language.Translations);
+        }
+        
+        _context.Languages.Remove(language);
+
+        return Save();
+    }
+    
     public bool Save()
     {
         var saved = _context.SaveChanges();
