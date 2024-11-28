@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Localizard.Data.Entites;
 using Localizard.Domain.Enums;
 using Localizard.Domain.ViewModel;
 
@@ -14,12 +15,12 @@ public class ProjectDetail
     public string Key { get; set; }
     
     public int TranslationId { get; set; }
-    public int ProjectInfoId { get; set; }
-    public string Description { get; set; }
+    public int ProjectInfoId { get; set; } 
+    // public string Description { get; set; }
     public List<int> TagIds { get; set; } = new List<int>();
     public virtual ICollection<Translation> Translation { get; set; }
     [JsonIgnore]
-    public ICollection<ProjectInfo> ProjectInfos { get; set; } = new List<ProjectInfo>();
+    public List<ProjectInfo> ProjectInfo { get; set; }
     [JsonIgnore]
     public PlatformEnum PlatformCategories { get; set; }
     

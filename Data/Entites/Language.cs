@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json.Serialization;
+using Localizard.Data.Entites;
 
 namespace Localizard.Domain.Entites;
 

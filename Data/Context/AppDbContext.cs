@@ -1,4 +1,5 @@
-﻿using Localizard.Domain.Entites;
+﻿using Localizard.Data.Entites;
+using Localizard.Domain.Entites;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

@@ -2,6 +2,7 @@
 using Localizard.DAL;
 using Localizard.DAL.Repositories;
 using Localizard.DAL.Repositories.Implementations;
+using Localizard.Data.Entites;
 using Localizard.Domain.Entites;
 using Localizard.Domain.Enums;
 using Localizard.Domain.ViewModel;
@@ -29,22 +30,6 @@ public class ProjectDetailController : ControllerBase
         _projectDetailRepo = projectDetailRepo;
         _translationRepo = translationRepo;
         _tag = tag;
-    }
-   
-
-    [HttpGet]
-    public IActionResult GetAllProjectDetails()
-    {
-        var projectDetails = _projectDetailRepo.GetAll();
-
-        var projectDetailViews = new List<GetProjectDetailView>();
-        foreach (var detial in projectDetails)
-        {
-            var detailView = GetDetailMapper(detial);
-            projectDetailViews.Add(detailView);
-        }
-
-        return Ok(projectDetailViews);
     }
 
     [HttpGet("{id}")]
@@ -77,7 +62,7 @@ public class ProjectDetailController : ControllerBase
         foreach (var translate in detail.Translations)
         {
             var existingTranslation = _translationRepo.GetAll()
-                .FirstOrDefault(t => t.LanguageId == translate.LanguageId && t.Text == translate.Text);
+                .FirstOrDefault(t => t.SymbolKey == translate.SymbolKey);
 
             if (existingTranslation != null)
             {
@@ -127,7 +112,6 @@ public class ProjectDetailController : ControllerBase
         }
 
         existingDetail.Key = update.Key;
-        existingDetail.Description = update.Description;
 
         var translations = _translationRepo.GetAll();
         existingDetail.Translation.Clear();
@@ -169,7 +153,6 @@ public class ProjectDetailController : ControllerBase
         {
             ProjectInfoId = detail.ProjectInfoId,
             Key = detail.Key,
-            Description = detail.Description,
             AvailableTranslations = detail.Translation,
             Tags = detail.TagIds
                 .Where(t => Enum.IsDefined(typeof(TagEnum), t))
@@ -190,7 +173,6 @@ public class ProjectDetailController : ControllerBase
         ProjectDetail detailView = new ProjectDetail()
         {
             Key = create.Key,
-            Description = create.Description,
             ProjectInfoId = create.ProjectInfoId,
             Translation = new List<Translation>(),
             TagIds = create.TagIds,

@@ -42,23 +42,14 @@ public class ProjectRepo : IProjectRepo
 
     public bool DeleteProject(int id)
     {
-        var project = _context.Projects.Include(p => p.Languages)
-            .FirstOrDefault(p => p.Id == id);
-
-        if (project == null)
-        {
-            return false;
-        }
-
-        if (project.Languages != null)
-        {
-            _context.Languages.RemoveRange(project.Languages);
-        }
+        var project = _context.Projects.FirstOrDefault(p => p.Id == id);
         
-        _context.Projects.Remove(project);
+        if(project != null)
+            _context.Projects.Remove(project);
 
         return Save();
     }
+    
 
     public bool Save()
     {

@@ -42,8 +42,6 @@ public class ApiThreeSideController : ControllerBase
             translations = p.Translation.Select(t => new
             {
                 t.ProjectDetails,
-                t.Language,
-                t.Text
             }).ToList()
         }).ToList();
 

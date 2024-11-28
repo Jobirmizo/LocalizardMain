@@ -88,9 +88,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowAllOrigins", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") 
+        policy.AllowAnyOrigin() 
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -105,14 +105,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+}   
 
 app.MapIdentityApi<IdentityUser>();
 
 app.UseHttpsRedirection();
 
 app.UseRouting();
-app.UseCors();
+app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 

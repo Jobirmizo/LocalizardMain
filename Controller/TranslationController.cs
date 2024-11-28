@@ -4,6 +4,7 @@ using AutoMapper;
 using Localizard.DAL;
 using Localizard.DAL.Repositories;
 using Localizard.DAL.Repositories.Implementations;
+using Localizard.Data.Entites;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
 using Localizard.Features.Translation;
@@ -32,7 +33,7 @@ public class TranslationController : ControllerBase
     
     
     [HttpGet]
-    public async Task<IActionResult> GetAllTranslations()
+    public IActionResult GetAllTranslations()
     {
         var translations = _translationRepo.GetAll();
 
@@ -69,9 +70,11 @@ public class TranslationController : ControllerBase
         if (create == null)
             return BadRequest(ModelState);
 
-        var checkTranslation = _translationRepo.GetAll().Select(t => t.LanguageId).Contains(create.LanguageId);
+        var checkTranslation = _translationRepo.GetAll().Select(t => t.SymbolKey).Contains(create.SymbolKey);
 
         var translation = CreateTranslationMappper(create);
+        
+        
 
         if (checkTranslation)
         {
@@ -110,8 +113,8 @@ public class TranslationController : ControllerBase
             return StatusCode(422, ModelState);
         }
 
-        existingTranslation.Text = update.Text;
-        existingTranslation.LanguageId = update.LanguageId;
+        // existingTranslation.Text = update.Text;
+        // existingTranslation.LanguageId = update.LanguageId;
 
         if (!ModelState.IsValid)
             return BadRequest();
@@ -147,21 +150,16 @@ public class TranslationController : ControllerBase
     
     #region GetTranslation
        private GetTranslationView GetTranslationMapper(Translation translation)
-        {
-            GetTranslationView getTranslates = new GetTranslationView()
-            {
-                Text = translation.Text,
+       {
+           GetTranslationView translate = new GetTranslationView()
+           {
                 SymbolKey = translation.SymbolKey,
-                Language = new Language()
-                {
-                    Id = translation.Language.Id,
-                    Name = translation.Language.Name,
-                    LanguageCode = translation.Language.LanguageCode
-                }
-            };
-    
-            return getTranslates;
-        }
+                LanguageId = translation.LanguageId,
+                Text = translation.Text
+           };
+
+           return translate;
+       }
     #endregion
     #region CreateTranlation
     private Translation CreateTranslationMappper(CreateTranslationView create)
@@ -169,8 +167,8 @@ public class TranslationController : ControllerBase
         Translation translate = new Translation()
         {
             SymbolKey = create.SymbolKey,
-            LanguageId = create.LanguageId,
-            Text = create.Text
+            Text = create.Text,
+            LanguageId = create.LanguageId
         };
         return translate;
     }

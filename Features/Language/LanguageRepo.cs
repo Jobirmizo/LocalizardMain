@@ -44,19 +44,11 @@ public class LanguageRepo : ILanguageRepo
 
     public bool DeleteLanguage(int id)
     {
-        var language = _context.Languages
-            .Include(l => l.ProjectInfos)
-            .Include(l => l.Translations)
-            .FirstOrDefault(l => l.Id == id);
+        var language = _context.Languages.FirstOrDefault(l => l.Id == id);
 
         if (language == null)
         {
             return false;
-        }
-
-        if (language.Translations != null && language.Translations.Any())
-        {
-            _context.Translations.RemoveRange(language.Translations);
         }
         
         _context.Languages.Remove(language);

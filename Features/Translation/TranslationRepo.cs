@@ -1,4 +1,5 @@
-﻿using Localizard.Domain.Entites;
+﻿using Localizard.Data.Entites;
+using Localizard.Domain.Entites;
 using Microsoft.EntityFrameworkCore;
 
 namespace Localizard.DAL.Repositories.Implementations;
@@ -14,7 +15,7 @@ public class TranslationRepo : ITranslationRepo
     
     public ICollection<Translation> GetAll()
     {
-        return _context.Translations.OrderBy(p => p.Id).Include(l => l.Language).ToList();
+        return _context.Translations.OrderBy(p => p.Id).ToList();
     }
 
     public async Task<Translation> GetById(int id)

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Localizard.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241127110921_InitialCreate")]
+    [Migration("20241128084150_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -39,6 +39,32 @@ namespace Localizard.Migrations
                     b.HasIndex("ProjectInfosId");
 
                     b.ToTable("LanguageProjectInfo");
+                });
+
+            modelBuilder.Entity("Localizard.Data.Entites.Translation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SymbolKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LanguageId");
+
+                    b.ToTable("Translations");
                 });
 
             modelBuilder.Entity("Localizard.Domain.Entites.Language", b =>
@@ -69,10 +95,6 @@ namespace Localizard.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -131,32 +153,6 @@ namespace Localizard.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("Localizard.Domain.Entites.Translation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("LanguageId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SymbolKey")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LanguageId");
-
-                    b.ToTable("Translations");
-                });
-
             modelBuilder.Entity("Localizard.Domain.Entites.User", b =>
                 {
                     b.Property<int>("Id")
@@ -212,14 +208,7 @@ namespace Localizard.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>
-                {
-                    b.HasOne("Localizard.Domain.Entites.ProjectDetail", null)
-                        .WithMany("ProjectInfos")
-                        .HasForeignKey("ProjectDetailId");
-                });
-
-            modelBuilder.Entity("Localizard.Domain.Entites.Translation", b =>
+            modelBuilder.Entity("Localizard.Data.Entites.Translation", b =>
                 {
                     b.HasOne("Localizard.Domain.Entites.Language", "Language")
                         .WithMany("Translations")
@@ -230,6 +219,13 @@ namespace Localizard.Migrations
                     b.Navigation("Language");
                 });
 
+            modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>
+                {
+                    b.HasOne("Localizard.Domain.Entites.ProjectDetail", null)
+                        .WithMany("ProjectInfo")
+                        .HasForeignKey("ProjectDetailId");
+                });
+
             modelBuilder.Entity("ProjectDetailTranslation", b =>
                 {
                     b.HasOne("Localizard.Domain.Entites.ProjectDetail", null)
@@ -238,7 +234,7 @@ namespace Localizard.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Localizard.Domain.Entites.Translation", null)
+                    b.HasOne("Localizard.Data.Entites.Translation", null)
                         .WithMany()
                         .HasForeignKey("TranslationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -252,7 +248,7 @@ namespace Localizard.Migrations
 
             modelBuilder.Entity("Localizard.Domain.Entites.ProjectDetail", b =>
                 {
-                    b.Navigation("ProjectInfos");
+                    b.Navigation("ProjectInfo");
                 });
 #pragma warning restore 612, 618
         }

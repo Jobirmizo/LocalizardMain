@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Localizard.DAL.Repositories;
+using Localizard.Data.Entites;
 using Localizard.Domain.Entites;
 using Localizard.Domain.Enums;
 

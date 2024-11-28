@@ -1,4 +1,5 @@
-﻿using Localizard.Domain.Entites;
+﻿using Localizard.Data.Entites;
+using Localizard.Domain.Entites;
 
 namespace Localizard.DAL.Repositories.Implementations;
 
