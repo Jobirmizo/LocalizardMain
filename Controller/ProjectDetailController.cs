@@ -31,22 +31,28 @@ public class ProjectDetailController : ControllerBase
         _translationRepo = translationRepo;
         _tag = tag;
     }
-
+    
+    
     [HttpGet]
-    public async Task<IActionResult> GetProjecDetails()
+    public IActionResult GetAllProjectDetails(string? Search = null)
     {
         var projectDetails = _projectDetailRepo.GetAll();
-
-        var detailView = new List<GetProjectDetailView>();
-        foreach (var detail in projectDetails)
+        if (!string.IsNullOrEmpty(Search))
         {
-            var view = GetDetailMapper(detail);
-            detailView.Add(view);
+            foreach (var detail in projectDetails)
+            {
+                Console.WriteLine($"Key: {detail.Key}, TagIds Type: {detail.TagIds?.GetType()}");
+            }
+            var projectDetailViews = projectDetails.Select(detial => GetDetailMapper(detial)).ToList();
+            projectDetailViews = projectDetailViews
+                .Where(pd => 
+                    pd.Key != null && pd.Key.IndexOf(Search, StringComparison.OrdinalIgnoreCase) >= 0 || pd.Tags != null && pd.Tags.Any(
+                        tag => tag.ToString().IndexOf(Search,StringComparison.OrdinalIgnoreCase) >= 0 )).ToList();
         }
-
-        return Ok(detailView);
+        
+        
+        return Ok(projectDetails);
     }
-    
     
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProjectDetailById(int id)
@@ -68,8 +74,9 @@ public class ProjectDetailController : ControllerBase
         if (detail == null)
             return BadRequest(ModelState);
 
-        var checkDetail = _projectDetailRepo.GetAll().Select(d => d.Key).Contains(detail.Key);
-        var validTagIds = Enum.GetValues(typeof(TagEnum)).Cast<int>();
+        var checkDetail =  _projectDetailRepo.GetAll().Select(d => d.Key).Contains(detail.Key);
+        var tags = await _tag.GetAllAsync();
+        var validTagIds = tags.Select(t => t.Id).ToList();    
         var invalidTags = detail.TagIds.Except(validTagIds).ToList();
         
         if (invalidTags.Any())
@@ -170,14 +177,7 @@ public class ProjectDetailController : ControllerBase
             ProjectInfoId = detail.ProjectInfoId,
             Key = detail.Key,
             AvailableTranslations = detail.Translation,
-            Tags = detail.TagIds
-                .Where(t => Enum.IsDefined(typeof(TagEnum), t))
-                .Select(t => new GetTagView()
-                {
-                    Id = t,
-                    Name = Enum.GetName(typeof(TagEnum), t)
-                })
-                .ToList()
+            TagIds = detail.TagIds
         };
         
         return detailView;

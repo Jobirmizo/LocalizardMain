@@ -1,9 +1,13 @@
-﻿using Localizard.Domain.Enums;
+﻿using Localizard.Data.Entites;
+using Localizard.Domain.Enums;
 
 namespace Localizard.DAL.Repositories;
 
 public interface ITagRepo
 {
-    Task<IEnumerable<GetTagView>> GetAllTagsAsync();
-    Task<TagEnum> GetById(int id);
+    Task<List<Tag>> GetAllAsync();
+    Task<Tag> GetById(int id);
+    bool TagExists(int id);
+    bool CreateTag(Tag tag);
+    bool Save();
 }

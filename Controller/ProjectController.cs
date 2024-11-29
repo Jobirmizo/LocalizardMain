@@ -99,7 +99,7 @@ public class ProjectController : ControllerBase
     
     
     [HttpPost]
-    public async Task<IActionResult> CreateProject([FromBody] CreateProjectView create)
+    public IActionResult CreateProject([FromBody] CreateProjectView create)
     {
         if (create == null)
             return BadRequest(ModelState);
@@ -109,12 +109,12 @@ public class ProjectController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var project = _projectRepo.GetAllProjects().Select(x => x.Name).Contains(create.Name);
+        var project =  _projectRepo.GetAllProjects().Select(x => x.Name).Contains(create.Name);
         
         var projectInfo =  ProjectInfoMapper(create);
         projectInfo.CreatedBy = userId;
 
-        var languages =  _languageRepo.GetAll();
+        var languages =   _languageRepo.GetAll();
 
         foreach (var language in languages)
         {

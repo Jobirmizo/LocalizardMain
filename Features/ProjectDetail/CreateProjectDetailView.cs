@@ -10,6 +10,6 @@ public class CreateProjectDetailView
     public int ProjectInfoId { get; set; }
     public List<CreateTranslationView> Translations { get; set; }
     public string Description { get; set; }
-    public List<int> TagIds { get; set; }
-    
+    public List<int> TagIds { get; set; } = new List<int>();
+
 }

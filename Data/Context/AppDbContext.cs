@@ -19,5 +19,6 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Language> Languages { get; set; }
     public DbSet<Translation> Translations { get; set; }
+    public DbSet<Tag> Tags { get; set; }
     
 }
