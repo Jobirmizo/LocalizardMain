@@ -112,6 +112,8 @@ namespace Localizard.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ProjectInfoId");
+
                     b.ToTable("ProjectDetails");
                 });
 
@@ -137,15 +139,10 @@ namespace Localizard.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("ProjectDetailId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProjectDetailId");
 
                     b.ToTable("Projects");
                 });
@@ -216,11 +213,15 @@ namespace Localizard.Migrations
                     b.Navigation("Language");
                 });
 
-            modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>
+            modelBuilder.Entity("Localizard.Domain.Entites.ProjectDetail", b =>
                 {
-                    b.HasOne("Localizard.Domain.Entites.ProjectDetail", null)
-                        .WithMany("ProjectInfo")
-                        .HasForeignKey("ProjectDetailId");
+                    b.HasOne("Localizard.Domain.Entites.ProjectInfo", "ProjectInfo")
+                        .WithMany("ProjectDetail")
+                        .HasForeignKey("ProjectInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProjectInfo");
                 });
 
             modelBuilder.Entity("ProjectDetailTranslation", b =>
@@ -243,9 +244,9 @@ namespace Localizard.Migrations
                     b.Navigation("Translations");
                 });
 
-            modelBuilder.Entity("Localizard.Domain.Entites.ProjectDetail", b =>
+            modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>
                 {
-                    b.Navigation("ProjectInfo");
+                    b.Navigation("ProjectDetail");
                 });
 #pragma warning restore 612, 618
         }

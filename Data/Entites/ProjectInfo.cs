@@ -20,4 +20,6 @@ public class ProjectInfo
     [JsonIgnore]
     public DateTime? UpdatedAt { get; set; }
     public virtual ICollection<Language> Languages { get; set; }
+    [JsonIgnore]
+    public virtual List<ProjectDetail> ProjectDetail { get; set; } = new List<ProjectDetail>();
 }

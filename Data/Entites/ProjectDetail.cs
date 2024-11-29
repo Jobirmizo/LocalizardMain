@@ -16,11 +16,10 @@ public class ProjectDetail
     
     public int TranslationId { get; set; }
     public int ProjectInfoId { get; set; } 
-    // public string Description { get; set; }
     public List<int> TagIds { get; set; } = new List<int>();
     public virtual ICollection<Translation> Translation { get; set; }
     [JsonIgnore]
-    public List<ProjectInfo> ProjectInfo { get; set; }
+    public ProjectInfo ProjectInfo { get; set; }
     [JsonIgnore]
     public PlatformEnum PlatformCategories { get; set; }
     

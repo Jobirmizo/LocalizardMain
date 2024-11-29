@@ -32,6 +32,22 @@ public class ProjectDetailController : ControllerBase
         _tag = tag;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetProjecDetails()
+    {
+        var projectDetails = _projectDetailRepo.GetAll();
+
+        var detailView = new List<GetProjectDetailView>();
+        foreach (var detail in projectDetails)
+        {
+            var view = GetDetailMapper(detail);
+            detailView.Add(view);
+        }
+
+        return Ok(detailView);
+    }
+    
+    
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProjectDetailById(int id)
     {

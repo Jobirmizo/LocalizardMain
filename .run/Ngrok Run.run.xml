@@ -1,0 +1,10 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Ngrok Run" type="ngrok-deploy" factoryName="Ngrok" singleton="false" server-name="Ngrok2">
+    <deployment type="Ngrok">
+      <settings />
+    </deployment>
+    <method v="2">
+      <option name="LaunchBrowser.Before.Run" url="http://localhost:5063" />
+    </method>
+  </configuration>
+</component>
