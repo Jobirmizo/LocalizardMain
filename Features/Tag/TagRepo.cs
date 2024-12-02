@@ -14,9 +14,9 @@ public class TagRepo : ITagRepo
         _context = context;
     }
     
-    public async Task<List<Tag>> GetAllAsync()
+    public List<Tag> GetAllAsync()
     {
-        return await _context.Tags.OrderBy(t => t.Id).ToListAsync();
+        return _context.Tags.OrderBy(t => t.Id).ToList();
     }
 
     public async Task<Tag> GetById(int id)

@@ -57,7 +57,7 @@ public class TranslationController : ControllerBase
         var translation = await _translationRepo.GetById(id);
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         return Ok(translation);
     }
@@ -83,7 +83,7 @@ public class TranslationController : ControllerBase
         }
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         if (!_translationRepo.CreateTranslation(translation))
         {
@@ -137,7 +137,7 @@ public class TranslationController : ControllerBase
         var translationToDelete = await _translationRepo.GetById(translationId);
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         if (!_translationRepo.DeleteTranslation(translationToDelete))
         {

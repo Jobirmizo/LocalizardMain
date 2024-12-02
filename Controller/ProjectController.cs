@@ -55,7 +55,9 @@ public class ProjectController : ControllerBase
         
         if (!projects.Any())
             return NotFound("No projects found for the current user.");
-        
+
+   
+
         var pagedProjects = query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
@@ -131,7 +133,7 @@ public class ProjectController : ControllerBase
         }
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         if (!_projectRepo.CreateProject(projectInfo))
         {
@@ -186,7 +188,7 @@ public class ProjectController : ControllerBase
         }
         
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         
         if (!_projectRepo.UpdateProject(existingProject))

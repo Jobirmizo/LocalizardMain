@@ -19,9 +19,9 @@ public class TagController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllTags()
+    public IActionResult GetAllTags()
     {
-        var tags = await _tag.GetAllAsync();
+        var tags = _tag.GetAllAsync();
         return Ok(tags);
     }
 
@@ -33,12 +33,12 @@ public class TagController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTag([FromBody] CreateTagView create)
+    public IActionResult CreateTag([FromBody] CreateTagView create)
     {
         if (create == null)
             return BadRequest(ModelState);
 
-        var tags = await _tag.GetAllAsync();
+        var tags = _tag.GetAllAsync();
         var checkTag = tags.Select(t => t.Name).Contains(create.Name);
 
         var mappedTag = CreateTagMapper(create);
@@ -51,7 +51,7 @@ public class TagController : ControllerBase
 
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest();
         }
 
         if (!_tag.CreateTag(mappedTag))

@@ -8,8 +8,8 @@ public class CreateProjectDetailView
 {
     public string Key { get; set; }
     public int ProjectInfoId { get; set; }
-    public List<CreateTranslationView> Translations { get; set; }
+    
     public string Description { get; set; }
-    public List<int> TagIds { get; set; } = new List<int>();
-
+    public int[] TagIds { get; set; } = null!;
+    public List<CreateTranslationView> Translations { get; set; }
 }

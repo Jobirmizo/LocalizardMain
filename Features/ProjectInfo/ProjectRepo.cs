@@ -44,8 +44,10 @@ public class ProjectRepo : IProjectRepo
     {
         var project = _context.Projects.Include(p => p.ProjectDetail).FirstOrDefault(p => p.Id == id);
 
-        if (project != null)
+        if (project == null)
+        {
             return false;
+        }
 
         if (project.ProjectDetail != null)
         {

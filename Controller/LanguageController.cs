@@ -29,7 +29,7 @@ public class LanguageController : ControllerBase
         var mappedLanguages = _mapper.Map<List<LanguageView>>(languages);
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
         
         return Ok(mappedLanguages);
     }
@@ -43,7 +43,7 @@ public class LanguageController : ControllerBase
         var language = await _languageRepo.GetById(id);
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         return Ok(language);
     }
@@ -65,7 +65,7 @@ public class LanguageController : ControllerBase
         }
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         var languageMap = _mapper.Map<Language>(languageCreate);
 
@@ -75,7 +75,7 @@ public class LanguageController : ControllerBase
             return StatusCode(500, ModelState);
         }
 
-        return Ok("Successfull created;-)");
+        return Ok("Successfully created;-)");
     }
 
     [HttpPut]
@@ -103,7 +103,7 @@ public class LanguageController : ControllerBase
         
         
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         if (!_languageRepo.UpdateLanguage(checkLanguage))
         {

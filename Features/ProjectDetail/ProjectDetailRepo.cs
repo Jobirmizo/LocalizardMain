@@ -13,7 +13,7 @@ public class ProjectDetailRepo : IProjectDetailRepo
     }
     public ICollection<ProjectDetail> GetAll()
     {
-        return _context.ProjectDetails.Include(x => x.Translation).OrderBy(p => p.Id).ToList();
+        return _context.ProjectDetails.Include(x => x.Translation).Include(t => t.Tags).OrderBy(p => p.Id).ToList();
     }
 
     public async Task<ProjectDetail> GetById(int id)
@@ -40,13 +40,20 @@ public class ProjectDetailRepo : IProjectDetailRepo
 
     public bool DeleteProjectDetail(int id)
     {
-        var detail = _context.ProjectDetails.FirstOrDefault(d => d.Id == id);
+        var detail = _context.ProjectDetails.Include(t => t.Translation).FirstOrDefault(d => d.Id == id);
 
         if (detail == null)
         {
             return false;
         }
-        _context.Remove(detail);
+
+        if (detail.Translation != null)
+        {
+            _context.RemoveRange(detail.Translation);
+        }
+        
+        _context.ProjectDetails.Remove(detail);
+        
         return Save();
     }
 

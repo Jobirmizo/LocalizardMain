@@ -3,6 +3,7 @@ using Localizard.DAL;
 using Localizard.DAL.Repositories;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
+using Localizard.Features.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +49,7 @@ public class UserController : ControllerBase
             data = mappedUsers,
         };
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         return Ok(response);
     }
@@ -63,14 +64,14 @@ public class UserController : ControllerBase
         var user = await _userManager.GetByIdAsync(id);
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         return Ok(user);
     }
     
 
     [HttpPut]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] User update)
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserView update)
     {
         if (update == null || !ModelState.IsValid)
         {
@@ -80,8 +81,7 @@ public class UserController : ControllerBase
         var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == update.Id);
         if (user == null)
             return NotFound(new { message = "User not found" });
-
-        user.Username = update.Username ?? user.Username;
+        
         user.Role = update.Role ?? user.Role;
 
         if (!string.IsNullOrEmpty(update.Password))
@@ -89,9 +89,10 @@ public class UserController : ControllerBase
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(update.Password);
             user.Password = hashedPassword;
         }
-        
+
+        var mappedUser = _mapper.Map<User>(user);
           
-        if (!_userManager.UpdateUser(user))
+        if (!_userManager.UpdateUser(mappedUser))
         {
             ModelState.AddModelError("", "Something went wrong while saving the user.");
             return StatusCode(500, ModelState);
@@ -109,7 +110,7 @@ public class UserController : ControllerBase
         var userDelete = await _userManager.GetByIdAsync(userId);
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         if (!_userManager.DeleteUser(userDelete))
         {

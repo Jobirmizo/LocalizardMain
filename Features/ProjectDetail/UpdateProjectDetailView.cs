@@ -6,5 +6,5 @@ public class UpdateProjectDetailView
     public string Key { get; set; }
     public int[] TranslationIds { get; set; } = null!;
     public string Description { get; set; }
-    public string Tag { get; set; }
+    public int[] TagIds { get; set; } = null!;
 }

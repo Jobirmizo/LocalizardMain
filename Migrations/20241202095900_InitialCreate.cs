@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -8,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Localizard.Migrations
 {
     /// <inheritdoc />
-    public partial class IntitialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,6 +41,19 @@ namespace Localizard.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Projects", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -113,7 +125,7 @@ namespace Localizard.Migrations
                     Key = table.Column<string>(type: "text", nullable: false),
                     TranslationId = table.Column<int>(type: "integer", nullable: false),
                     ProjectInfoId = table.Column<int>(type: "integer", nullable: false),
-                    TagIds = table.Column<List<int>>(type: "integer[]", nullable: false),
+                    TagId = table.Column<int>(type: "integer", nullable: false),
                     PlatformCategories = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -123,6 +135,30 @@ namespace Localizard.Migrations
                         name: "FK_ProjectDetails_Projects_ProjectInfoId",
                         column: x => x.ProjectInfoId,
                         principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectDetailTag",
+                columns: table => new
+                {
+                    ProjectDetailsId = table.Column<int>(type: "integer", nullable: false),
+                    TagsId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectDetailTag", x => new { x.ProjectDetailsId, x.TagsId });
+                    table.ForeignKey(
+                        name: "FK_ProjectDetailTag_ProjectDetails_ProjectDetailsId",
+                        column: x => x.ProjectDetailsId,
+                        principalTable: "ProjectDetails",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectDetailTag_Tags_TagsId",
+                        column: x => x.TagsId,
+                        principalTable: "Tags",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -162,6 +198,11 @@ namespace Localizard.Migrations
                 column: "ProjectInfoId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProjectDetailTag_TagsId",
+                table: "ProjectDetailTag",
+                column: "TagsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProjectDetailTranslation_TranslationId",
                 table: "ProjectDetailTranslation",
                 column: "TranslationId");
@@ -179,10 +220,16 @@ namespace Localizard.Migrations
                 name: "LanguageProjectInfo");
 
             migrationBuilder.DropTable(
+                name: "ProjectDetailTag");
+
+            migrationBuilder.DropTable(
                 name: "ProjectDetailTranslation");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "ProjectDetails");

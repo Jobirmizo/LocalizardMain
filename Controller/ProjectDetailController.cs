@@ -18,18 +18,18 @@ namespace Localizard.Controller;
 public class ProjectDetailController : ControllerBase
 {
     private readonly IProjectDetailRepo _projectDetail;
-    private readonly IMapper _mapper;
     private readonly IProjectDetailRepo _projectDetailRepo;
     private readonly ITranslationRepo _translationRepo;
     private readonly ITagRepo _tag;
+    private readonly AppDbContext _context;
     public ProjectDetailController(IMapper mapper, IProjectDetailRepo projectDetail, 
-        IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo, ITagRepo tag)
+        IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo, ITagRepo tag, AppDbContext context)
     {
-        _mapper = mapper;
         _projectDetail = projectDetail;
         _projectDetailRepo = projectDetailRepo;
         _translationRepo = translationRepo;
         _tag = tag;
+        _context = context;
     }
     
     
@@ -39,19 +39,20 @@ public class ProjectDetailController : ControllerBase
         var projectDetails = _projectDetailRepo.GetAll();
         if (!string.IsNullOrEmpty(Search))
         {
-            foreach (var detail in projectDetails)
-            {
-                Console.WriteLine($"Key: {detail.Key}, TagIds Type: {detail.TagIds?.GetType()}");
-            }
-            var projectDetailViews = projectDetails.Select(detial => GetDetailMapper(detial)).ToList();
-            projectDetailViews = projectDetailViews
-                .Where(pd => 
-                    pd.Key != null && pd.Key.IndexOf(Search, StringComparison.OrdinalIgnoreCase) >= 0 || pd.Tags != null && pd.Tags.Any(
-                        tag => tag.ToString().IndexOf(Search,StringComparison.OrdinalIgnoreCase) >= 0 )).ToList();
+            var detailView = projectDetails.Select(detail => GetDetailMapper(detail)).ToList();
+            
+            detailView = detailView
+                .Where(pd =>
+                    (pd.Key != null && pd.Key.IndexOf(Search, StringComparison.OrdinalIgnoreCase) >= 0) || 
+                    (pd.Tags != null && pd.Tags.Any(
+                        tag => tag.Name.IndexOf(Search, StringComparison.OrdinalIgnoreCase) >= 0))) // Use tag.Name instead
+                .ToList();
+
+            return Ok(detailView);
         }
         
-        
-        return Ok(projectDetails);
+        var allProjectDetailViews = projectDetails.Select(detail => GetDetailMapper(detail)).ToList();
+        return Ok(allProjectDetailViews);
     }
     
     [HttpGet("{id}")]
@@ -63,7 +64,7 @@ public class ProjectDetailController : ControllerBase
         var projectDetail = await _projectDetail.GetById(id);
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);  
+            return BadRequest();  
 
         return Ok(projectDetail);
     }
@@ -75,7 +76,7 @@ public class ProjectDetailController : ControllerBase
             return BadRequest(ModelState);
 
         var checkDetail =  _projectDetailRepo.GetAll().Select(d => d.Key).Contains(detail.Key);
-        var tags = await _tag.GetAllAsync();
+        var tags = _tag.GetAllAsync();
         var validTagIds = tags.Select(t => t.Id).ToList();    
         var invalidTags = detail.TagIds.Except(validTagIds).ToList();
         
@@ -93,9 +94,15 @@ public class ProjectDetailController : ControllerBase
                 return StatusCode(422, ModelState);
             }
         }
-        
-        
         var projectDetail = CraeteDetailMapper(detail);
+
+        foreach (var tag in tags)
+        {
+            if (projectDetail.Tags is null)
+                projectDetail.Tags = new List<Tag>();
+            if(detail.TagIds.Contains(tag.Id))
+                projectDetail.Tags.Add(tag);
+        }
         
         if (checkDetail)
         {
@@ -104,7 +111,7 @@ public class ProjectDetailController : ControllerBase
         }
 
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         if (!_projectDetailRepo.CreateProjectDetail(projectDetail))
         {
@@ -144,9 +151,18 @@ public class ProjectDetailController : ControllerBase
             if (update.TranslationIds.Contains(translate.Id)) 
                 existingDetail.Translation.Add(translate);
         }
-        
+
+        var tags = _tag.GetAllAsync();
+        existingDetail.Tags.Clear();
+
+        foreach (var tag in tags)
+        {
+            if (update.TagIds.Contains(tag.Id)) 
+                existingDetail.Tags.Add(tag);
+        }
+            
         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+            return BadRequest();
 
         
         if (!_projectDetailRepo.UpdateProjectDetail(existingDetail))
@@ -177,7 +193,12 @@ public class ProjectDetailController : ControllerBase
             ProjectInfoId = detail.ProjectInfoId,
             Key = detail.Key,
             AvailableTranslations = detail.Translation,
-            TagIds = detail.TagIds
+            Tags = detail.Tags?.Select(tag => new Tag
+            {
+                Id = tag.Id,
+                Name = tag.Name
+            }).ToList() ?? new List<Tag>(),
+            TagIds = detail.Tags.Select(tag => tag.Id).ToArray()
         };
         
         return detailView;
@@ -191,7 +212,7 @@ public class ProjectDetailController : ControllerBase
             Key = create.Key,
             ProjectInfoId = create.ProjectInfoId,
             Translation = new List<Translation>(),
-            TagIds = create.TagIds,
+            Tags = new List<Tag>()
         };
         if (create.Translations != null)
         {

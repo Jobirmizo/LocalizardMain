@@ -3,6 +3,7 @@ using Localizard.DAL.Repositories.Implementations;
 using Localizard.Data.Entites;
 using Localizard.Domain.Entites;
 using Localizard.Domain.ViewModel;
+using Localizard.Features.User;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Localizard.Helper;
@@ -22,6 +23,8 @@ public class MappingProfiles : Profile
 
         CreateMap<User, GetUsersView>();
         CreateMap<GetUsersView, User>();
+
+        CreateMap<User, UpdateUserView>().ReverseMap();
 
         CreateMap<Language, LanguageView>();
         CreateMap<LanguageView, Language>();
@@ -52,6 +55,7 @@ public class MappingProfiles : Profile
         
         CreateMap<Translation, CreateTranslationView>();
         CreateMap<CreateTranslationView, Translation>();
+        
 
     }
 }
