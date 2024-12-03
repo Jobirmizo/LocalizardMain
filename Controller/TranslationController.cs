@@ -17,6 +17,7 @@ namespace Localizard.Controller;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
+[Authorize]
 public class TranslationController : ControllerBase
 {
 

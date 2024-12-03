@@ -1,13 +1,14 @@
 ﻿using Localizard.DAL.Repositories;
 using Localizard.Data.Entites;
 using Localizard.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Localizard.Controller;
 [Route("api/[controller]/[action]")]
 [ApiController]
-
+[Authorize]
 public class TagController : ControllerBase
 {
 

@@ -9,6 +9,7 @@ namespace Localizard.Domain.ViewModel;
 
 public class GetProjectDetailView
 {
+    public int Id { get; set; }
     public string Key { get; set; }
     public string Description { get; set; }
     public int ProjectInfoId { get; set; }

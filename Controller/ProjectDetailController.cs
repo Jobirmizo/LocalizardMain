@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Collections;
+using AutoMapper;
 using Localizard.DAL;
 using Localizard.DAL.Repositories;
 using Localizard.DAL.Repositories.Implementations;
@@ -6,6 +7,7 @@ using Localizard.Data.Entites;
 using Localizard.Domain.Entites;
 using Localizard.Domain.Enums;
 using Localizard.Domain.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -15,28 +17,41 @@ namespace Localizard.Controller;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
+[Authorize]
 public class ProjectDetailController : ControllerBase
 {
     private readonly IProjectDetailRepo _projectDetail;
     private readonly IProjectDetailRepo _projectDetailRepo;
+    private readonly IProjectRepo _project;
     private readonly ITranslationRepo _translationRepo;
     private readonly ITagRepo _tag;
-    private readonly AppDbContext _context;
     public ProjectDetailController(IMapper mapper, IProjectDetailRepo projectDetail, 
-        IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo, ITagRepo tag, AppDbContext context)
+        IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo, ITagRepo tag, AppDbContext context, IProjectRepo project)
     {
         _projectDetail = projectDetail;
         _projectDetailRepo = projectDetailRepo;
         _translationRepo = translationRepo;
         _tag = tag;
-        _context = context;
+        _project = project;
     }
     
     
     [HttpGet]
-    public IActionResult GetAllProjectDetails(string? Search = null)
+    public IActionResult GetAllProjectDetails( int projectId, string? Search = null)
     {
         var projectDetails = _projectDetailRepo.GetAll();
+        
+        var filterDetail = projectDetails
+            .Where(d => d.ProjectInfoId == projectId)
+            .ToList();
+        var data = Array.Empty<object>();
+        
+        if (!filterDetail.Any())
+        {
+            return NotFound(data);
+        }
+        
+
         if (!string.IsNullOrEmpty(Search))
         {
             var detailView = projectDetails.Select(detail => GetDetailMapper(detail)).ToList();
@@ -51,7 +66,8 @@ public class ProjectDetailController : ControllerBase
             return Ok(detailView);
         }
         
-        var allProjectDetailViews = projectDetails.Select(detail => GetDetailMapper(detail)).ToList();
+        
+        var allProjectDetailViews = filterDetail.Select(detail => GetDetailMapper(detail)).ToList();
         return Ok(allProjectDetailViews);
     }
     
@@ -83,17 +99,6 @@ public class ProjectDetailController : ControllerBase
         if (invalidTags.Any())
             return BadRequest($"Invalid tag IDs: {string.Join(", ", invalidTags)}");
         
-        foreach (var translate in detail.Translations)
-        {
-            var existingTranslation = _translationRepo.GetAll()
-                .FirstOrDefault(t => t.SymbolKey == translate.SymbolKey);
-
-            if (existingTranslation != null)
-            {
-                ModelState.AddModelError("", $"Translation already exists for language {translate.LanguageId}.");
-                return StatusCode(422, ModelState);
-            }
-        }
         var projectDetail = CraeteDetailMapper(detail);
 
         foreach (var tag in tags)
@@ -142,6 +147,7 @@ public class ProjectDetailController : ControllerBase
         }
 
         existingDetail.Key = update.Key;
+        existingDetail.Description = update.Description;
 
         var translations = _translationRepo.GetAll();
         existingDetail.Translation.Clear();
@@ -190,8 +196,10 @@ public class ProjectDetailController : ControllerBase
     {
         GetProjectDetailView detailView = new GetProjectDetailView()
         {
+            Id = detail.Id,
             ProjectInfoId = detail.ProjectInfoId,
             Key = detail.Key,
+            Description = detail.Description,
             AvailableTranslations = detail.Translation,
             Tags = detail.Tags?.Select(tag => new Tag
             {
@@ -211,6 +219,7 @@ public class ProjectDetailController : ControllerBase
         {
             Key = create.Key,
             ProjectInfoId = create.ProjectInfoId,
+            Description = create.Description,
             Translation = new List<Translation>(),
             Tags = new List<Tag>()
         };

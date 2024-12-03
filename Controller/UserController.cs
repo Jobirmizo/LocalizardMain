@@ -13,6 +13,7 @@ namespace Localizard.Controller;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
+
 public class UserController : ControllerBase
 {
     
@@ -27,7 +28,7 @@ public class UserController : ControllerBase
         _context = context;
     }
     
-    
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public IActionResult GetAllUsers(int page = 1, int pageSize = 10)
     {
@@ -54,7 +55,7 @@ public class UserController : ControllerBase
         return Ok(response);
     }
     
-        
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
@@ -69,7 +70,7 @@ public class UserController : ControllerBase
         return Ok(user);
     }
     
-
+    [Authorize(Roles = "Admin")]
     [HttpPut]
     public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserView update)
     {
@@ -101,6 +102,7 @@ public class UserController : ControllerBase
         return Ok(new { message = "Updated" });
     }
     
+    [Authorize(Roles = "Admin")]
     [HttpDelete]
     public async Task<IActionResult> DeleteUser(int userId)
     {

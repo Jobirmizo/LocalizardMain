@@ -3,6 +3,7 @@ using System;
 using Localizard.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Localizard.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241203061644_DescriptionAdded")]
+    partial class DescriptionAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,9 +68,6 @@ namespace Localizard.Migrations
                     b.Property<int>("LanguageId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ProjectInfoId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("SymbolKey")
                         .IsRequired()
                         .HasColumnType("text");
@@ -79,8 +79,6 @@ namespace Localizard.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("LanguageId");
-
-                    b.HasIndex("ProjectInfoId");
 
                     b.ToTable("Translations");
                 });
@@ -253,10 +251,6 @@ namespace Localizard.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Localizard.Domain.Entites.ProjectInfo", null)
-                        .WithMany("Translations")
-                        .HasForeignKey("ProjectInfoId");
-
                     b.Navigation("Language");
                 });
 
@@ -309,8 +303,6 @@ namespace Localizard.Migrations
             modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>
                 {
                     b.Navigation("ProjectDetail");
-
-                    b.Navigation("Translations");
                 });
 #pragma warning restore 612, 618
         }

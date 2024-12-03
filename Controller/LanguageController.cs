@@ -10,7 +10,7 @@ namespace Localizard.Controller;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-// [Authorize]
+[Authorize]
 public class LanguageController : ControllerBase
 {
     private readonly ILanguageRepo _languageRepo;
