@@ -42,7 +42,7 @@ public class ProjectRepo : IProjectRepo
 
     public bool DeleteProject(int id)
     {
-        var project = _context.Projects.Include(p => p.ProjectDetail).Include(t => t.Translations).FirstOrDefault(p => p.Id == id);
+        var project = _context.Projects.Include(p => p.ProjectDetail).ThenInclude(x=>x.Translation).FirstOrDefault(p => p.Id == id);
 
         if (project == null)
         {
@@ -53,12 +53,7 @@ public class ProjectRepo : IProjectRepo
         {
             _context.RemoveRange(project.ProjectDetail);
         }
-
-        if (project.Translations != null)
-        {
-            _context.RemoveRange(project.Translations);
-        }
-
+        
         _context.Projects.Remove(project);
         
         return Save();

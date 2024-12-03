@@ -41,39 +41,29 @@ public class ProjectController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
         
-        var projects = _projectRepo.GetAllProjects()
-            .Where(p => p.CreatedBy == userId)
-            .ToList();
+        var isAdmin = HttpContext.User.IsInRole("Admin");
         
         if (pageNumber <= 0 || pageSize <= 0)
             return BadRequest("PageNumber and PageSize must be greater than zero.");
         
-        var query = _projectRepo.GetAllProjects()
-            .Where(p => p.CreatedBy == userId);
+        var query = isAdmin 
+            ? _projectRepo.GetAllProjects() 
+            : _projectRepo.GetAllProjects().Where(p => p.CreatedBy == userId);
         
         var totalProjects = query.Count();
         
-        if (!projects.Any())
-            return NotFound("No projects found for the current user.");
-
-   
-
+        if (totalProjects == 0)
+            return NotFound("No projects found.");
+        
         var pagedProjects = query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToList();
         
-        var projectInfoViews = new List<GetProjectView>(); 
-        
-        foreach (var project in projects)
-        {
-            var projectinfoView = ProjectViewMapper(project);
-            projectInfoViews.Add(projectinfoView);
-        }
+        var projectInfoViews = pagedProjects
+            .Select(project => ProjectViewMapper(project))
+            .ToList();
 
-        var languages = _languageRepo.GetAll();
-        
-        
         return Ok(new
         {
             TotalCount = totalProjects,
@@ -217,10 +207,7 @@ public class ProjectController : ControllerBase
         ProjectInfo projectInfo = new ProjectInfo()
         {
             Name = createProjectCreate.Name,
-            LanguageId = createProjectCreate.DefaultLanguageId,
-            CreatedAt = createProjectCreate.CreatedAt,
-            UpdatedAt = createProjectCreate.UpdatedAt,
-            
+            LanguageId = createProjectCreate.DefaultLanguageId
         };
         return projectInfo;
     }

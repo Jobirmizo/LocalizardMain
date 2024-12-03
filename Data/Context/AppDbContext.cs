@@ -1,5 +1,6 @@
 ﻿using Localizard.Data.Entites;
 using Localizard.Domain.Entites;
+using Localizard.Features.Auditable;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,37 @@ public class AppDbContext : DbContext
         : base(options)
     {
         
+    }
+
+    public override int SaveChanges()
+    {
+        UpdateTimestamps();
+        return base.SaveChanges();
+    }
+    
+    
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        UpdateTimestamps();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+    
+    private void UpdateTimestamps()
+    {
+        var entries = ChangeTracker.Entries<AuditableEntity>();
+
+        foreach (var entry in entries)
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = DateTime.UtcNow;
+                entry.Entity.UpdatedAt = DateTime.UtcNow;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = DateTime.UtcNow;
+            }
+        }
     }
 
     public DbSet<ProjectInfo> Projects { get; set; }

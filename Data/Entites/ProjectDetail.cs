@@ -16,7 +16,6 @@ public class ProjectDetail
     public string Key { get; set; }
     public string Description { get; set; }
     
-    public int TranslationId { get; set; }
     public int ProjectInfoId { get; set; }
     public int TagId { get; set; } 
     public virtual ICollection<Translation> Translation { get; set; }

@@ -19,7 +19,8 @@ namespace Localizard.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    LanguageCode = table.Column<string>(type: "text", nullable: false)
+                    LanguageCode = table.Column<string>(type: "text", nullable: false),
+                    Plurals = table.Column<string[]>(type: "text[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,8 +36,8 @@ namespace Localizard.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     LanguageId = table.Column<int>(type: "integer", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,27 +73,6 @@ namespace Localizard.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Translations",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SymbolKey = table.Column<string>(type: "text", nullable: false),
-                    LanguageId = table.Column<int>(type: "integer", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Translations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Translations_Languages_LanguageId",
-                        column: x => x.LanguageId,
-                        principalTable: "Languages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "LanguageProjectInfo",
                 columns: table => new
                 {
@@ -123,7 +103,7 @@ namespace Localizard.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Key = table.Column<string>(type: "text", nullable: false),
-                    TranslationId = table.Column<int>(type: "integer", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
                     ProjectInfoId = table.Column<int>(type: "integer", nullable: false),
                     TagId = table.Column<int>(type: "integer", nullable: false),
                     PlatformCategories = table.Column<int>(type: "integer", nullable: false)
@@ -164,25 +144,29 @@ namespace Localizard.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectDetailTranslation",
+                name: "Translations",
                 columns: table => new
                 {
-                    ProjectDetailsId = table.Column<int>(type: "integer", nullable: false),
-                    TranslationId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SymbolKey = table.Column<string>(type: "text", nullable: false),
+                    LanguageId = table.Column<int>(type: "integer", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    ProjectDetailsId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectDetailTranslation", x => new { x.ProjectDetailsId, x.TranslationId });
+                    table.PrimaryKey("PK_Translations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProjectDetailTranslation_ProjectDetails_ProjectDetailsId",
-                        column: x => x.ProjectDetailsId,
-                        principalTable: "ProjectDetails",
+                        name: "FK_Translations_Languages_LanguageId",
+                        column: x => x.LanguageId,
+                        principalTable: "Languages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProjectDetailTranslation_Translations_TranslationId",
-                        column: x => x.TranslationId,
-                        principalTable: "Translations",
+                        name: "FK_Translations_ProjectDetails_ProjectDetailsId",
+                        column: x => x.ProjectDetailsId,
+                        principalTable: "ProjectDetails",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -203,14 +187,14 @@ namespace Localizard.Migrations
                 column: "TagsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectDetailTranslation_TranslationId",
-                table: "ProjectDetailTranslation",
-                column: "TranslationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Translations_LanguageId",
                 table: "Translations",
                 column: "LanguageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Translations_ProjectDetailsId",
+                table: "Translations",
+                column: "ProjectDetailsId");
         }
 
         /// <inheritdoc />
@@ -223,7 +207,7 @@ namespace Localizard.Migrations
                 name: "ProjectDetailTag");
 
             migrationBuilder.DropTable(
-                name: "ProjectDetailTranslation");
+                name: "Translations");
 
             migrationBuilder.DropTable(
                 name: "Users");
@@ -232,16 +216,13 @@ namespace Localizard.Migrations
                 name: "Tags");
 
             migrationBuilder.DropTable(
+                name: "Languages");
+
+            migrationBuilder.DropTable(
                 name: "ProjectDetails");
 
             migrationBuilder.DropTable(
-                name: "Translations");
-
-            migrationBuilder.DropTable(
                 name: "Projects");
-
-            migrationBuilder.DropTable(
-                name: "Languages");
         }
     }
 }

@@ -13,6 +13,6 @@ public class  Translation
     public string Text { get; set; }
     public Language Language { get; set; }
     [JsonIgnore]
-    public virtual ICollection<ProjectDetail> ProjectDetails { get; set; } = new List<ProjectDetail>();
+    public virtual ProjectDetail ProjectDetails { get; set; }
 
 }
