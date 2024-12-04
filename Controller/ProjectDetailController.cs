@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
 
-[Route("api/[controller]/[action]")]
+[Route("api/project-detail")]
 [ApiController]
 [Authorize]
 public class ProjectDetailController : ControllerBase
@@ -36,7 +36,7 @@ public class ProjectDetailController : ControllerBase
     }
     
     
-    [HttpGet]
+    [HttpGet("get-all")]
     public IActionResult GetAllProjectDetails( int projectId, string? Search = null)
     {
         var projectDetails = _projectDetailRepo.GetAll();
@@ -71,7 +71,7 @@ public class ProjectDetailController : ControllerBase
         return Ok(allProjectDetailViews);
     }
     
-    [HttpGet("{id}")]
+    [HttpGet("get-by/{id}")]
     public async Task<IActionResult> GetProjectDetailById(int id)
     {
         if (!_projectDetail.ProjectDetailExist(id))
@@ -85,7 +85,7 @@ public class ProjectDetailController : ControllerBase
         return Ok(projectDetail);
     }
     
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<IActionResult> CreateProjectDetail([FromBody] CreateProjectDetailView detail)
     {
         if (detail == null)
@@ -127,7 +127,7 @@ public class ProjectDetailController : ControllerBase
         return Ok("Successfully created;-)");
     }
     
-    [HttpPut]
+    [HttpPut("update")]
     public async Task<IActionResult> UpdateProjectDetail(int id, [FromBody] UpdateProjectDetailView update)
     {
         if (update == null)
@@ -180,7 +180,7 @@ public class ProjectDetailController : ControllerBase
         return Ok("Successfully updated the project.");
     }
     
-    [HttpDelete]
+    [HttpDelete("delete")]
     public IActionResult DeleteProjectDetail(int id)
     {
         if (!_projectDetailRepo.DeleteProjectDetail(id))

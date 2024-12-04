@@ -19,7 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Localizard.Controller;
 
-[Route("api/[controller]/[action]")]
+[Route("api/auth/")]
 [ApiController]
 [Authorize]
 public class AuthController : ControllerBase
@@ -41,8 +41,8 @@ public class AuthController : ControllerBase
     }
     
     [AllowAnonymous]
-    [HttpPost]
-    public async Task<ActionResult<LoginResponseView>> Login(LoginView request)
+    [HttpPost("login")]
+    public async Task<ActionResult<LoginResponseView>> login(LoginView request)
     {
         if (request == null)
         {
@@ -63,8 +63,8 @@ public class AuthController : ControllerBase
     }
     
     [AllowAnonymous]
-    [HttpPost]
-    public async Task<IActionResult> Register([FromBody] RegisterView model)
+    [HttpPost("register")]
+    public async Task<IActionResult> register([FromBody] RegisterView model)
     {
         if (model == null || !ModelState.IsValid)
         {
@@ -102,7 +102,7 @@ public class AuthController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet]
+    [HttpGet("user-pagination")]
     public async Task<IActionResult> UsersPagination(int page = 1, int pageSize = 10)
     {
         var totalRecords = await _context.Users.CountAsync();

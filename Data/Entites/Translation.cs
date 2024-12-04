@@ -11,6 +11,7 @@ public class  Translation
     public string SymbolKey { get; set; }
     public int LanguageId { get; set; }
     public string Text { get; set; }
+    [JsonIgnore]
     public Language Language { get; set; }
     [JsonIgnore]
     public virtual ProjectDetail ProjectDetails { get; set; }

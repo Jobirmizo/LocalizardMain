@@ -1,14 +1,15 @@
 ﻿using Localizard.DAL;
+using Localizard.Domain.Entites;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Localizard.Controller;
 
-public class ApiThreeSideController : ControllerBase
+public class ThirdSideController : ControllerBase
 {
     private readonly AppDbContext _context;
 
-    public ApiThreeSideController(AppDbContext context)
+    public ThirdSideController(AppDbContext context)
     {
         _context = context;
     }

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
 
-[Route("api/[controller]/[action]")]
+[Route("api/user")]
 [ApiController]
 
 public class UserController : ControllerBase
@@ -29,7 +29,7 @@ public class UserController : ControllerBase
     }
     
     [Authorize(Roles = "Admin")]
-    [HttpGet]
+    [HttpGet("get-all")]
     public IActionResult GetAllUsers(int page = 1, int pageSize = 10)
     {
         if (page < 1) page = 1;
@@ -56,7 +56,7 @@ public class UserController : ControllerBase
     }
     
     [Authorize(Roles = "Admin")]
-    [HttpGet("{id}")]
+    [HttpGet("get-by/{id}")]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
         if (!_userManager.UserExists(id))
@@ -71,7 +71,7 @@ public class UserController : ControllerBase
     }
     
     [Authorize(Roles = "Admin")]
-    [HttpPut]
+    [HttpPut("update")]
     public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserView update)
     {
         if (update == null || !ModelState.IsValid)
@@ -103,7 +103,7 @@ public class UserController : ControllerBase
     }
     
     [Authorize(Roles = "Admin")]
-    [HttpDelete]
+    [HttpDelete("delete")]
     public async Task<IActionResult> DeleteUser(int userId)
     {
         if (!_userManager.UserExists(userId))

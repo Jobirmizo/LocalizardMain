@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Localizard.Controller;
 
-[Route("api/[controller]/[action]")]
+[Route("api/languge/")]
 [ApiController]
 [Authorize]
 public class LanguageController : ControllerBase
@@ -22,7 +22,7 @@ public class LanguageController : ControllerBase
         _mapper = mapper;
     }
     
-    [HttpGet]
+    [HttpGet("get-all")]
     public IActionResult GetAllLanguages()
     {
         var languages = _languageRepo.GetAll();
@@ -34,7 +34,7 @@ public class LanguageController : ControllerBase
         return Ok(mappedLanguages);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("get-by/{id}")]
     public async Task<IActionResult> GetLanguageById(int id)
     {
         if (!ModelState.IsValid)
@@ -48,7 +48,7 @@ public class LanguageController : ControllerBase
         return Ok(language);
     }
 
-    [HttpPost]
+    [HttpPost ("create")]
     public IActionResult CreateLanguage([FromBody] LanguageView languageCreate)
     {
         if (languageCreate == null)
@@ -78,7 +78,7 @@ public class LanguageController : ControllerBase
         return Ok("Successfully created;-)");
     }
 
-    [HttpPut]
+    [HttpPut ("update")]
     public async Task<IActionResult> UpdateLanguage(int id, [FromBody] UpdateLanguageView update)
     {
         if (update == null)
@@ -114,7 +114,7 @@ public class LanguageController : ControllerBase
         return Ok("Updated");
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("delete/{id:int}")]
     public IActionResult DeleteLanguage(int id)
     {
         

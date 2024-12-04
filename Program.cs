@@ -71,8 +71,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddMvc();
 builder.Services.AddControllers();
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
-    .AddEntityFrameworkStores<AppDbContext>();
+// builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+//     .AddEntityFrameworkStores<AppDbContext>();
 
 
 #endregion
@@ -107,7 +107,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }   
 
-app.MapIdentityApi<IdentityUser>();
+// app.MapIdentityApi<IdentityUser>();
 
 app.UseHttpsRedirection();
 

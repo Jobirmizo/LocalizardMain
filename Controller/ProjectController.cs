@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
 
-[Route("api/[controller]/[action]")]
+[Route("api/project/")]
 [ApiController]
 [Authorize]
 public class ProjectController : ControllerBase
@@ -34,7 +34,7 @@ public class ProjectController : ControllerBase
     }
 
    
-    [HttpGet]
+    [HttpGet("get-all")]
     public async Task<IActionResult> GetAllProjects([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -75,7 +75,7 @@ public class ProjectController : ControllerBase
     }
 
     
-    [HttpGet("{id}")]
+    [HttpGet("get-by/{id}")]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
         var project = await _projectRepo.GetById(id);
@@ -90,7 +90,7 @@ public class ProjectController : ControllerBase
     
     
     
-    [HttpPost]
+    [HttpPost("create")]
     public IActionResult CreateProject([FromBody] CreateProjectView create)
     {
         if (create == null)
@@ -134,7 +134,7 @@ public class ProjectController : ControllerBase
         return Ok("Successfully created");
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("update/{id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(403)]
@@ -190,7 +190,7 @@ public class ProjectController : ControllerBase
         return Ok("Successfully updated the project.");
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("delete/{id}")]
     public IActionResult DeleteProject(int id)
     {
         if (!_projectRepo.DeleteProject(id))

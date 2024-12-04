@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Localizard.Controller;
-[Route("api/[controller]/[action]")]
+[Route("api/tag")]
 [ApiController]
 [Authorize]
 public class TagController : ControllerBase
@@ -19,21 +19,21 @@ public class TagController : ControllerBase
         _tag = tag;
     }
 
-    [HttpGet]
+    [HttpGet("get-all")]
     public IActionResult GetAllTags()
     {
         var tags = _tag.GetAllAsync();
         return Ok(tags);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("get-by/{id}")]
     public async Task<IActionResult> CreateTag(int id)
     {
         var tag = await _tag.GetById(id);
         return Ok(tag);
     }
 
-    [HttpPost]
+    [HttpPost("create")]
     public IActionResult CreateTag([FromBody] CreateTagView create)
     {
         if (create == null)

@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
 
-[Route("api/[controller]/[action]")]
+[Route("api/translation")]
 [ApiController]
 [Authorize]
 public class TranslationController : ControllerBase
@@ -33,7 +33,7 @@ public class TranslationController : ControllerBase
     }
     
     
-    [HttpGet]
+    [HttpGet("get-all")]
     public IActionResult GetAllTranslations()
     {
         var translations = _translationRepo.GetAll();
@@ -49,7 +49,7 @@ public class TranslationController : ControllerBase
     }
     
     [AllowAnonymous]
-    [HttpGet("{id}")]
+    [HttpGet("get-by/{id}")]
     public async Task<IActionResult> GetTranslationById(int id)
     {
         if (!_translationRepo.TranslationExists(id))
@@ -63,7 +63,7 @@ public class TranslationController : ControllerBase
         return Ok(translation);
     }
     
-    [HttpPost]
+    [HttpPost("create")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     public IActionResult CreateTranslation([FromBody] CreateTranslationView create)
@@ -95,7 +95,7 @@ public class TranslationController : ControllerBase
         return Ok("Successfull created");
     }
     
-    [HttpPut]
+    [HttpPut("update")]
     public async Task<IActionResult> UpdateTranslation(int id, [FromBody] UpdateTranslationView update)
     {
         if (update == null)
@@ -114,9 +114,6 @@ public class TranslationController : ControllerBase
             return StatusCode(422, ModelState);
         }
 
-        // existingTranslation.Text = update.Text;
-        // existingTranslation.LanguageId = update.LanguageId;
-
         if (!ModelState.IsValid)
             return BadRequest();
 
@@ -129,7 +126,7 @@ public class TranslationController : ControllerBase
         return Ok("updated)");
     }
 
-    [HttpDelete]
+    [HttpDelete("delete")]
     public async Task<IActionResult> DeleteTranslation(int translationId)
     {
         if (!_translationRepo.TranslationExists(translationId))
