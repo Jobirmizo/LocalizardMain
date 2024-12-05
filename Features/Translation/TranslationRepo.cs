@@ -13,9 +13,9 @@ public class TranslationRepo : ITranslationRepo
         _context = context;
     }
     
-    public ICollection<Translation> GetAll()
+    public async Task<ICollection<Translation>> GetAll()
     {
-        return _context.Translations.OrderBy(p => p.Id).ToList();
+        return await _context.Translations.OrderBy(p => p.Id).ToListAsync();
     }
 
     public async Task<Translation> GetById(int id)

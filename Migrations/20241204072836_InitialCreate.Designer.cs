@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Localizard.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241203125647_InitialCreate")]
+    [Migration("20241204072836_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -135,8 +135,9 @@ namespace Localizard.Migrations
                     b.Property<int>("ProjectInfoId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TagId")
-                        .HasColumnType("integer");
+                    b.Property<int[]>("TagIds")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
 
                     b.HasKey("Id");
 

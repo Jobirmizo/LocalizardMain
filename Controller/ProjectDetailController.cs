@@ -7,6 +7,7 @@ using Localizard.Data.Entites;
 using Localizard.Domain.Entites;
 using Localizard.Domain.Enums;
 using Localizard.Domain.ViewModel;
+using Localizard.Features.Translation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -20,19 +21,24 @@ namespace Localizard.Controller;
 [Authorize]
 public class ProjectDetailController : ControllerBase
 {
+    private readonly AppDbContext _context;
     private readonly IProjectDetailRepo _projectDetail;
     private readonly IProjectDetailRepo _projectDetailRepo;
-    private readonly IProjectRepo _project;
+    private readonly IProjectRepo _projectRepo;
     private readonly ITranslationRepo _translationRepo;
     private readonly ITagRepo _tag;
+    private readonly IMapper _mapper;
+    
     public ProjectDetailController(IMapper mapper, IProjectDetailRepo projectDetail, 
-        IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo, ITagRepo tag, AppDbContext context, IProjectRepo project)
+        IProjectDetailRepo projectDetailRepo, ITranslationRepo translationRepo, ITagRepo tag, AppDbContext context, IProjectRepo project, IProjectRepo projectRepo)
     {
+        _mapper = mapper;
         _projectDetail = projectDetail;
         _projectDetailRepo = projectDetailRepo;
         _translationRepo = translationRepo;
         _tag = tag;
-        _project = project;
+        _context = context;
+        _projectRepo = projectRepo;
     }
     
     
@@ -98,8 +104,13 @@ public class ProjectDetailController : ControllerBase
         
         if (invalidTags.Any())
             return BadRequest($"Invalid tag IDs: {string.Join(", ", invalidTags)}");
-        
-        var projectDetail = CraeteDetailMapper(detail);
+
+        var project = await _projectRepo.GetById(detail.ProjectInfoId);
+
+        if (project is null) return BadRequest();
+
+        var LaguageIds = project.Languages.Select(x => x.Id);
+        var projectDetail = CraeteDetailMapper(detail, LaguageIds);
 
         foreach (var tag in tags)
         {
@@ -127,58 +138,75 @@ public class ProjectDetailController : ControllerBase
         return Ok("Successfully created;-)");
     }
     
-    [HttpPut("update")]
-    public async Task<IActionResult> UpdateProjectDetail(int id, [FromBody] UpdateProjectDetailView update)
+    [HttpPut("update/{id}")]
+    public async Task<IActionResult> UpdateProjectDetail(int id, [FromBody] UpdateProjectDetailView detail)
     {
-        if (update == null)
-            return BadRequest(ModelState);
 
-        var existingDetail = await _projectDetailRepo.GetById(id);
+        if (detail == null)
+            return BadRequest();
+        
+        var projectDetail = await _projectDetailRepo.GetById(id);
+        
 
-        if (existingDetail == null)
-            return NotFound("there is no such detial");
+        if (projectDetail == null)
+            return NotFound("Project Detial not found");
 
-        var projectDetialExists = _projectDetailRepo.GetAll().Any(x => x.Key == update.Key && x.Id != id);
+        var projectChecks = _projectDetailRepo.GetAll().Any(x => x.Key == detail.Key && x.Id != id);
 
-        if (projectDetialExists)
+        if (projectChecks)
         {
-            ModelState.AddModelError("","Project Detail already exist, check it again!");
+            ModelState.AddModelError("","Project Detait with this name already exists");
             return StatusCode(422, ModelState);
         }
 
-        existingDetail.Key = update.Key;
-        existingDetail.Description = update.Description;
-
-        var translations = _translationRepo.GetAll();
-        existingDetail.Translation.Clear();
-
-        foreach (var translate in translations)
-        {
-            if (update.TranslationIds.Contains(translate.Id)) 
-                existingDetail.Translation.Add(translate);
-        }
+        projectDetail.Key = detail.Key;
+        projectDetail.Description = detail.Description;
 
         var tags = _tag.GetAllAsync();
-        existingDetail.Tags.Clear();
+        projectDetail.Tags.Clear();
 
         foreach (var tag in tags)
         {
-            if (update.TagIds.Contains(tag.Id)) 
-                existingDetail.Tags.Add(tag);
+            if(detail.TagIds.Contains(tag.Id))
+                projectDetail.Tags.Add(tag);
         }
+        
+        
+
+        projectDetail.Translations.Clear();
+        
+        var project = await _projectRepo.GetById(projectDetail.ProjectInfoId);
+        
+        var LaguageIds = project.Languages.Select(x => x.Id);
+        
+        foreach (var item in detail.Translations)
+        {
             
+            if (LaguageIds.Contains(item.LanguageId))
+            {
+                Translation translation = new Translation();
+                translation.LanguageId = item.LanguageId;
+                translation.SymbolKey = item.SymbolKey;
+                translation.Text = item.Text;
+                    
+                projectDetail.Translations.Add(translation);
+            }
+           
+        }
+
         if (!ModelState.IsValid)
             return BadRequest();
 
-        
-        if (!_projectDetailRepo.UpdateProjectDetail(existingDetail))
+        if (!_projectDetailRepo.UpdateProjectDetail(projectDetail))
         {
-            ModelState.AddModelError("", "Something went wrong while saving the project Detail.");
+            ModelState.AddModelError("","Something went wrong while saving the project Detial");
             return StatusCode(500, ModelState);
         }
-
-        return Ok("Successfully updated the project.");
+        
+         
+        return Ok("Successfully updated");
     }
+
     
     [HttpDelete("delete")]
     public IActionResult DeleteProjectDetail(int id)
@@ -200,7 +228,7 @@ public class ProjectDetailController : ControllerBase
             ProjectInfoId = detail.ProjectInfoId,
             Key = detail.Key,
             Description = detail.Description,
-            AvailableTranslations = detail.Translation,
+            AvailableTranslations = detail.Translations,
             Tags = detail.Tags?.Select(tag => new Tag
             {
                 Id = tag.Id,
@@ -213,33 +241,38 @@ public class ProjectDetailController : ControllerBase
     }
     #endregion
     #region CreateDetailMapper
-    private ProjectDetail CraeteDetailMapper(CreateProjectDetailView create)
+    private ProjectDetail CraeteDetailMapper(CreateProjectDetailView create,IEnumerable<int>  Languages)
     {
         ProjectDetail detailView = new ProjectDetail()
         {
             Key = create.Key,
             ProjectInfoId = create.ProjectInfoId,
             Description = create.Description,
-            Translation = new List<Translation>(),
-            Tags = new List<Tag>()
+            Translations = new List<Translation>(),
+            Tags = new List<Tag>(),
+            TagIds = create.TagIds
         };
         if (create.Translations != null)
         {
             foreach (var translate in create.Translations)
             {
-                var translation = new Translation()
+                if (Languages.Contains(translate.LanguageId))
                 {
-                    SymbolKey = translate.SymbolKey,
-                    LanguageId = translate.LanguageId,
-                    Text = translate.Text
-                };
+                    var translation = new Translation()
+                    {
+                        SymbolKey = translate.SymbolKey,
+                        LanguageId = translate.LanguageId,
+                        Text = translate.Text
+                    };
+                    
+                    detailView.Translations.Add(translation);
+                }
                 
-                detailView.Translation.Add(translation);
             }
         }
 
         return detailView;
     }
     #endregion
-
+    
 }

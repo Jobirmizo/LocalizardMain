@@ -135,10 +135,6 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPut("update/{id}")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateProject(int id, [FromBody] UpdateProjectView update)
     {
         if (update == null)

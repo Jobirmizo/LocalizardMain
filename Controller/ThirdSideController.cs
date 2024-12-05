@@ -27,7 +27,7 @@ public class ThirdSideController : ControllerBase
 
         var projectDetails = await _context.ProjectDetails
             .Where(p => p.ProjectInfoId == myEntity.Id)
-            .Include(p => p.Translation)
+            .Include(p => p.Translations)
             .ToListAsync();
 
         if (projectDetails == null || !projectDetails.Any())
@@ -40,7 +40,7 @@ public class ThirdSideController : ControllerBase
             id = p.Id,
             namekeys = p.Key,
             parent = p.ProjectInfoId,
-            translations = p.Translation.Select(t => new
+            translations = p.Translations.Select(t => new
             {
                 t.ProjectDetails,
             }).ToList()

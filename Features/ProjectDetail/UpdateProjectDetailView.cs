@@ -1,10 +1,14 @@
-﻿namespace Localizard.Domain.ViewModel;
+﻿using Localizard.Data.Entites;
+using Localizard.Features.Translation;
+
+namespace Localizard.Domain.ViewModel;
 
 public class UpdateProjectDetailView
 {
     public int Id { get; set; }
     public string Key { get; set; }
-    public int[] TranslationIds { get; set; } = null!;
+    public ICollection<UpdateTranslationView> Translations { get; set; }
     public string Description { get; set; }
     public int[] TagIds { get; set; } = null!;
+    
 }

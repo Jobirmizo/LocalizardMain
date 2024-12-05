@@ -132,8 +132,9 @@ namespace Localizard.Migrations
                     b.Property<int>("ProjectInfoId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TagId")
-                        .HasColumnType("integer");
+                    b.Property<int[]>("TagIds")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
 
                     b.HasKey("Id");
 

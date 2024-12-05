@@ -71,8 +71,7 @@ public class AuthController : ControllerBase
             return BadRequest("Invalid registration request");
               
         }
-          
-
+        
         var existingUser = await _context.Users.SingleOrDefaultAsync(u => u.Username == model.Username);
         if (existingUser != null)
         {
@@ -91,17 +90,11 @@ public class AuthController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         
-        var token =_tokenService.GenerateJwtToken(user);
         
-        return Ok(new
-        {
-            token,
-            message = "User registered successfully"
-
-        });
+        
+        return Ok(new { message = "User registered successfully"});
     }
-
-    [AllowAnonymous]
+    
     [HttpGet("user-pagination")]
     public async Task<IActionResult> UsersPagination(int page = 1, int pageSize = 10)
     {

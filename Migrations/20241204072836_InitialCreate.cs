@@ -105,7 +105,7 @@ namespace Localizard.Migrations
                     Key = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     ProjectInfoId = table.Column<int>(type: "integer", nullable: false),
-                    TagId = table.Column<int>(type: "integer", nullable: false),
+                    TagIds = table.Column<int[]>(type: "integer[]", nullable: false),
                     PlatformCategories = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>

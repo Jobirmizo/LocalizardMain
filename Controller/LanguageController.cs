@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Localizard.Controller;
 
-[Route("api/languge/")]
+[Route("api/language/")]
 [ApiController]
 [Authorize]
 public class LanguageController : ControllerBase
@@ -100,6 +100,8 @@ public class LanguageController : ControllerBase
 
         checkLanguage.Name = update.Name;
         checkLanguage.LanguageCode = update.LanguageCode;
+        checkLanguage.Plurals = update.Plurals;
+        
         
         
         if (!ModelState.IsValid)
