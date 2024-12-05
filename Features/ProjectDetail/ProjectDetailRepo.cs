@@ -18,7 +18,7 @@ public class ProjectDetailRepo : IProjectDetailRepo
 
     public async Task<ProjectDetail> GetById(int id)
     {
-        return await _context.ProjectDetails.Include(x => x.Translations).FirstOrDefaultAsync(p => p.Id == id);
+        return await _context.ProjectDetails.Include(x => x.Translations).Include(x=>x.Tags).FirstOrDefaultAsync(p => p.Id == id);
     }
     
     public bool ProjectDetailExist(int id)

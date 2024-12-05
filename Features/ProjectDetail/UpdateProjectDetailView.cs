@@ -9,6 +9,6 @@ public class UpdateProjectDetailView
     public string Key { get; set; }
     public ICollection<UpdateTranslationView> Translations { get; set; }
     public string Description { get; set; }
-    public int[] TagIds { get; set; } = null!;
     
+    public virtual ICollection<Tag> Tags { get; set; }
 }

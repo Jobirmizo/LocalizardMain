@@ -254,3 +254,4 @@ D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Microsoft.AspNetCore.Authori
 D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Microsoft.AspNetCore.Metadata.dll
 D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+D:\Localizard-main\Localizard-main\bin\Debug\net8.0\Bogus.dll

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using AutoMapper;
 using Localizard.DAL;
 using Localizard.DAL.Repositories;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Localizard.Controller;
@@ -45,35 +47,54 @@ public class ProjectDetailController : ControllerBase
     [HttpGet("get-all")]
     public IActionResult GetAllProjectDetails( int projectId, string? Search = null)
     {
-        var projectDetails = _projectDetailRepo.GetAll();
+        var watch = Stopwatch.StartNew();
         
-        var filterDetail = projectDetails
-            .Where(d => d.ProjectInfoId == projectId)
-            .ToList();
+        
+        // var projectDetails = _projectDetailRepo.GetAll();
+        
+        var filterDetail = _context.ProjectDetails.Include(x => x.Translations).Include(t => t.Tags)
+            .Where(d => d.ProjectInfoId == projectId).OrderBy(p => p.Id).ToList();
+            
+
+        Console.WriteLine("getting all:"+watch.ElapsedMilliseconds);
+
+        // var watch2 = Stopwatch.StartNew();
+        // var filterDetail = projectDetails
+        //     .Where(d => d.ProjectInfoId == projectId)
+        //     .ToList();
+        // Console.WriteLine("filterig:"+watch2.ElapsedMilliseconds);
+
+
+        var watch3 = Stopwatch.StartNew();
         var data = Array.Empty<object>();
         
         if (!filterDetail.Any())
         {
             return NotFound(data);
         }
-        
-
+        Console.WriteLine("detial finding:"+watch3.ElapsedMilliseconds);
+    
+        var watch4 = Stopwatch.StartNew();
         if (!string.IsNullOrEmpty(Search))
         {
-            var detailView = projectDetails.Select(detail => GetDetailMapper(detail)).ToList();
+            var detailView = filterDetail.Select(detail => GetDetailMapper(detail)).ToList();
             
             detailView = detailView
                 .Where(pd =>
                     (pd.Key != null && pd.Key.IndexOf(Search, StringComparison.OrdinalIgnoreCase) >= 0) || 
                     (pd.Tags != null && pd.Tags.Any(
-                        tag => tag.Name.IndexOf(Search, StringComparison.OrdinalIgnoreCase) >= 0))) // Use tag.Name instead
+                        tag => tag.Name.IndexOf(Search, StringComparison.OrdinalIgnoreCase) >= 0)))
                 .ToList();
 
             return Ok(detailView);
         }
+        Console.WriteLine("search filtering:"+watch4.ElapsedMilliseconds);
         
-        
+        var watch5 = Stopwatch.StartNew();
         var allProjectDetailViews = filterDetail.Select(detail => GetDetailMapper(detail)).ToList();
+        Console.WriteLine("mapping:"+watch5.ElapsedMilliseconds);
+        
+        
         return Ok(allProjectDetailViews);
     }
     
@@ -98,7 +119,7 @@ public class ProjectDetailController : ControllerBase
             return BadRequest(ModelState);
 
         var checkDetail =  _projectDetailRepo.GetAll().Select(d => d.Key).Contains(detail.Key);
-        var tags = _tag.GetAllAsync();
+        var tags=_tag.GetAllAsync();
         var validTagIds = tags.Select(t => t.Id).ToList();    
         var invalidTags = detail.TagIds.Except(validTagIds).ToList();
         
@@ -150,35 +171,31 @@ public class ProjectDetailController : ControllerBase
 
         if (projectDetail == null)
             return NotFound("Project Detial not found");
-
-        var projectChecks = _projectDetailRepo.GetAll().Any(x => x.Key == detail.Key && x.Id != id);
-
-        if (projectChecks)
-        {
-            ModelState.AddModelError("","Project Detait with this name already exists");
-            return StatusCode(422, ModelState);
-        }
+        
 
         projectDetail.Key = detail.Key;
         projectDetail.Description = detail.Description;
-
+        
+        
         var tags = _tag.GetAllAsync();
+        
+        if(projectDetail is  null)
+            projectDetail.Tags = new List<Tag>();
+        
         projectDetail.Tags.Clear();
-
+        projectDetail.TagIds = new[] { 0 };
+        
         foreach (var tag in tags)
         {
-            if(detail.TagIds.Contains(tag.Id))
+            if(detail.Tags.Select(x=>x.Id).Contains(tag.Id))
                 projectDetail.Tags.Add(tag);
         }
-        
-        
-
-        projectDetail.Translations.Clear();
         
         var project = await _projectRepo.GetById(projectDetail.ProjectInfoId);
         
         var LaguageIds = project.Languages.Select(x => x.Id);
         
+        projectDetail.Translations.Clear();
         foreach (var item in detail.Translations)
         {
             
@@ -203,7 +220,7 @@ public class ProjectDetailController : ControllerBase
             return StatusCode(500, ModelState);
         }
         
-         
+
         return Ok("Successfully updated");
     }
 
@@ -234,7 +251,6 @@ public class ProjectDetailController : ControllerBase
                 Id = tag.Id,
                 Name = tag.Name
             }).ToList() ?? new List<Tag>(),
-            TagIds = detail.Tags.Select(tag => tag.Id).ToArray()
         };
         
         return detailView;

@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "AsptVE4u5LKB67Rf9DVwamr7BvDZo2BxnMqbFD+lMrqNXGo1K+He8M6+ygbh4k3880l6RDrhrWV0aZFTvTYF4w==",
+  "dgSpecHash": "1pvxU+UwAs/S/dH2SRpjAIlNTHFY6Tl46/Y8YrQb4Va0zu8S9pD6hTHUTgF5w8VFmZhE3WTMFINLTW5bWlgI+w==",
   "success": true,
   "projectFilePath": "D:\\Localizard-main\\Localizard-main\\Localizard.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hishi\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\hishi\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
+    "C:\\Users\\hishi\\.nuget\\packages\\bogus\\35.6.1\\bogus.35.6.1.nupkg.sha512",
     "C:\\Users\\hishi\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\hishi\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.8\\microsoft.aspnetcore.authentication.jwtbearer.8.0.8.nupkg.sha512",
     "C:\\Users\\hishi\\.nuget\\packages\\microsoft.aspnetcore.authorization\\8.0.8\\microsoft.aspnetcore.authorization.8.0.8.nupkg.sha512",

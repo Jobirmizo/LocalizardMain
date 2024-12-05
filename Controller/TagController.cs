@@ -34,7 +34,7 @@ public class TagController : ControllerBase
     }
 
     [HttpPost("create")]
-    public IActionResult CreateTag([FromBody] CreateTagView create)
+    public async Task<IActionResult> CreateTag([FromBody] CreateTagView create)
     {
         if (create == null)
             return BadRequest(ModelState);
