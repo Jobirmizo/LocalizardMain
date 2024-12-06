@@ -16,7 +16,7 @@ public class ProjectDetail
     public string Key { get; set; }
     public string Description { get; set; }
     public int ProjectInfoId { get; set; }
-    public int[] TagIds { get; set; } = null!;
+    public int[] TagIds { get; set; }
     public virtual ICollection<Translation> Translations { get; set; }
     [JsonIgnore]
     public ProjectInfo ProjectInfo { get; set; }

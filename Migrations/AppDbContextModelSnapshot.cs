@@ -237,7 +237,7 @@ namespace Localizard.Migrations
                         .IsRequired();
 
                     b.HasOne("Localizard.Domain.Entites.ProjectDetail", "ProjectDetails")
-                        .WithMany("Translation")
+                        .WithMany("Translations")
                         .HasForeignKey("ProjectDetailsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -280,7 +280,7 @@ namespace Localizard.Migrations
 
             modelBuilder.Entity("Localizard.Domain.Entites.ProjectDetail", b =>
                 {
-                    b.Navigation("Translation");
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>

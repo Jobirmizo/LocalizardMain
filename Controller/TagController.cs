@@ -64,6 +64,17 @@ public class TagController : ControllerBase
         return Ok("Successfully creted:-)");
     }
 
+    [HttpDelete("delete-tag{id}")]
+    public IActionResult DeleteTags([FromBody] int id)
+    {
+        if (!_tag.DeleteTag(id))
+        {
+            return NotFound(new { message = "Tag not found" });
+        }
+
+        return Ok(new { message = "Tag removed successfully" });
+    }
+
     #region CreateMapper
      private Tag CreateTagMapper(CreateTagView create)
         {

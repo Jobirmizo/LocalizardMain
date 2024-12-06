@@ -9,5 +9,6 @@ public interface ITagRepo
     Task<Tag> GetById(int id);
     bool TagExists(int id);
     bool CreateTag(Tag tag);
+    bool DeleteTag(int id);
     bool Save();
 }

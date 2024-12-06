@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Localizard.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241204072836_InitialCreate")]
+    [Migration("20241206055508_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -240,7 +240,7 @@ namespace Localizard.Migrations
                         .IsRequired();
 
                     b.HasOne("Localizard.Domain.Entites.ProjectDetail", "ProjectDetails")
-                        .WithMany("Translation")
+                        .WithMany("Translations")
                         .HasForeignKey("ProjectDetailsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -283,7 +283,7 @@ namespace Localizard.Migrations
 
             modelBuilder.Entity("Localizard.Domain.Entites.ProjectDetail", b =>
                 {
-                    b.Navigation("Translation");
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Localizard.Domain.Entites.ProjectInfo", b =>

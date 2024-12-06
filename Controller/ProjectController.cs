@@ -38,7 +38,6 @@ public class ProjectController : ControllerBase
     [HttpGet("get-all")]
     public async Task<IActionResult> GetAllProjects([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var watch = Stopwatch.StartNew();
         var userId = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
@@ -65,8 +64,6 @@ public class ProjectController : ControllerBase
         var projectInfoViews = pagedProjects
             .Select(project => ProjectViewMapper(project))
             .ToList();
-        watch.Stop();
-        Console.WriteLine("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa   "+watch.ElapsedMilliseconds);
         return Ok(new
         {
             TotalCount = totalProjects,

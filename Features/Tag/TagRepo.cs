@@ -34,7 +34,14 @@ public class TagRepo : ITagRepo
         _context.Add(tag);
         return Save();
     }
-    
+
+    public bool DeleteTag(int id)
+    {
+        var tag = _context.Tags.FirstOrDefault(t => t.Id == id);
+        _context.Tags.Remove(tag);
+        return Save();
+    }
+
     public bool Save()
     {
         var saved = _context.SaveChanges();

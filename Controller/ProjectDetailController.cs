@@ -47,34 +47,18 @@ public class ProjectDetailController : ControllerBase
     [HttpGet("get-all")]
     public IActionResult GetAllProjectDetails( int projectId, string? Search = null)
     {
-        var watch = Stopwatch.StartNew();
-        
-        
-        // var projectDetails = _projectDetailRepo.GetAll();
         
         var filterDetail = _context.ProjectDetails.Include(x => x.Translations).Include(t => t.Tags)
             .Where(d => d.ProjectInfoId == projectId).OrderBy(p => p.Id).ToList();
-            
-
-        Console.WriteLine("getting all:"+watch.ElapsedMilliseconds);
-
-        // var watch2 = Stopwatch.StartNew();
-        // var filterDetail = projectDetails
-        //     .Where(d => d.ProjectInfoId == projectId)
-        //     .ToList();
-        // Console.WriteLine("filterig:"+watch2.ElapsedMilliseconds);
-
-
-        var watch3 = Stopwatch.StartNew();
+        
         var data = Array.Empty<object>();
         
         if (!filterDetail.Any())
         {
             return NotFound(data);
         }
-        Console.WriteLine("detial finding:"+watch3.ElapsedMilliseconds);
     
-        var watch4 = Stopwatch.StartNew();
+      
         if (!string.IsNullOrEmpty(Search))
         {
             var detailView = filterDetail.Select(detail => GetDetailMapper(detail)).ToList();
@@ -88,12 +72,8 @@ public class ProjectDetailController : ControllerBase
 
             return Ok(detailView);
         }
-        Console.WriteLine("search filtering:"+watch4.ElapsedMilliseconds);
         
-        var watch5 = Stopwatch.StartNew();
         var allProjectDetailViews = filterDetail.Select(detail => GetDetailMapper(detail)).ToList();
-        Console.WriteLine("mapping:"+watch5.ElapsedMilliseconds);
-        
         
         return Ok(allProjectDetailViews);
     }
@@ -115,21 +95,33 @@ public class ProjectDetailController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> CreateProjectDetail([FromBody] CreateProjectDetailView detail)
     {
+        
         if (detail == null)
             return BadRequest(ModelState);
-
-        var checkDetail =  _projectDetailRepo.GetAll().Select(d => d.Key).Contains(detail.Key);
+       
+        
+        var watch2 = Stopwatch.StartNew();
+        var checkDetail =  _context.ProjectDetails.Any(d => d.Key == detail.Key);
+        
+        
         var tags=_tag.GetAllAsync();
+        
+        
         var validTagIds = tags.Select(t => t.Id).ToList();    
         var invalidTags = detail.TagIds.Except(validTagIds).ToList();
+      
+        
         
         if (invalidTags.Any())
             return BadRequest($"Invalid tag IDs: {string.Join(", ", invalidTags)}");
-
+        
+       
         var project = await _projectRepo.GetById(detail.ProjectInfoId);
 
         if (project is null) return BadRequest();
-
+       
+        
+        
         var LaguageIds = project.Languages.Select(x => x.Id);
         var projectDetail = CraeteDetailMapper(detail, LaguageIds);
 
@@ -140,6 +132,8 @@ public class ProjectDetailController : ControllerBase
             if(detail.TagIds.Contains(tag.Id))
                 projectDetail.Tags.Add(tag);
         }
+        
+        
         
         if (checkDetail)
         {
@@ -155,6 +149,7 @@ public class ProjectDetailController : ControllerBase
             ModelState.AddModelError("","Something went wrong while saving");
             return StatusCode(500, ModelState);
         }
+        
 
         return Ok("Successfully created;-)");
     }
@@ -183,11 +178,10 @@ public class ProjectDetailController : ControllerBase
             projectDetail.Tags = new List<Tag>();
         
         projectDetail.Tags.Clear();
-        projectDetail.TagIds = new[] { 0 };
         
         foreach (var tag in tags)
         {
-            if(detail.Tags.Select(x=>x.Id).Contains(tag.Id))
+            if(detail.TagIds.Contains(tag.Id))
                 projectDetail.Tags.Add(tag);
         }
         
@@ -265,7 +259,6 @@ public class ProjectDetailController : ControllerBase
             ProjectInfoId = create.ProjectInfoId,
             Description = create.Description,
             Translations = new List<Translation>(),
-            Tags = new List<Tag>(),
             TagIds = create.TagIds
         };
         if (create.Translations != null)
